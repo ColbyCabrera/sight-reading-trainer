@@ -53,8 +53,13 @@ class RhythmGenerator {
       } else if (i % 4 === 3) {
         rhythmStream.push(motifB); // Cadence
       } else {
-        const useA = Math.random() > 0.3;
-        rhythmStream.push(useA ? motifA : motifB);
+        const useNewPattern = Math.random() < variance;
+        if (useNewPattern) {
+          rhythmStream.push(getPattern());
+        } else {
+          const useA = Math.random() > 0.3;
+          rhythmStream.push(useA ? motifA : motifB);
+        }
       }
     }
     return rhythmStream;

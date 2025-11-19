@@ -45,7 +45,7 @@ export const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'
 export const SCALES = {
   MAJOR: [0, 2, 4, 5, 7, 9, 11],
   MINOR_NATURAL: [0, 2, 3, 5, 7, 8, 10],
-  MINOR_HARMONIC: [0, 2, 3, 5, 7, 8, 11], 
+  MINOR_HARMONIC: [0, 2, 3, 5, 7, 8, 11],
 };
 
 // Chord Progressions (0-indexed degrees)
@@ -63,24 +63,24 @@ export const PROGRESSIONS = {
 export const RHYTHM_PATTERNS = {
   '4/4': {
     SIMPLE: [
-      [1, 1, 1, 1],         
-      [2, 1, 1],            
-      [1, 1, 2],            
-      [4],                  
+      [1, 1, 1, 1],
+      [2, 1, 1],
+      [1, 1, 2],
+      [4],
       [2, 2]
     ],
     INTERMEDIATE: [
-      [1.5, 0.5, 1, 1],     
-      [1, 0.5, 0.5, 2],     
-      [0.5, 0.5, 0.5, 0.5, 1, 1], 
-      [1, 1, 1.5, 0.5],     
+      [1.5, 0.5, 1, 1],
+      [1, 0.5, 0.5, 2],
+      [0.5, 0.5, 0.5, 0.5, 1, 1],
+      [1, 1, 1.5, 0.5],
     ],
     COMPLEX: [
-      [0.75, 0.25, 1, 1, 1], 
-      [0.5, 1, 0.5, 1, 1],   
-      [1, 0.5, 1, 0.5, 1],   
-      [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], 
-      [1.5, 1.5, 1],         
+      [0.75, 0.25, 1, 1, 1],
+      [0.5, 1, 0.5, 1, 1],
+      [1, 0.5, 1, 0.5, 1],
+      [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      [1.5, 1.5, 1],
     ]
   },
   '3/4': {
@@ -109,12 +109,19 @@ export interface InternalDifficultyProfile {
 
 // Base internal configs that don't change with user sliders
 export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
-  1: { // Level 1-2
-    rangeLH: [48, 60], rangeRH: [60, 72],
-    maxLeapProb: 0.0, syncopationProb: 0,
+  1: { // Level 1
+    rangeLH: [48, 60], rangeRH: [60, 79],
+    maxLeapProb: 0.1, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
-    costs: { leapPenalty: 50, dissonancePenalty: 100, directionChangeBonus: 0, repetitionPenalty: 5 }
+    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 10 }
+  },
+  2: { // Level 2
+    rangeLH: [48, 60], rangeRH: [60, 79],
+    maxLeapProb: 0.1, syncopationProb: 0,
+    accidentalsAllowed: false,
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 10 }
   },
   3: { // Level 3-4
     rangeLH: [41, 62], rangeRH: [60, 77], // Lowered LH max to 62, RH min kept at 57
@@ -149,7 +156,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     accompanimentStyle: 'NONE',
     playability: '5-FINGER'
   };
-  
+
   // Level 2: Parallel Motion (Hands locked), Simple Rhythm
   if (level === 2) return {
     maxInterval: 3,
@@ -213,7 +220,7 @@ export const KEY_MAP: Record<string, { root: number, type: 'MAJOR' | 'MINOR', fl
   'F Major': { root: 65, type: 'MAJOR', flats: 1 },
   'Bb Major': { root: 70, type: 'MAJOR', flats: 2 },
   'Eb Major': { root: 63, type: 'MAJOR', flats: 3 },
-  
+
   'A Minor': { root: 57, type: 'MINOR', sharps: 0 },
   'E Minor': { root: 64, type: 'MINOR', sharps: 1 },
   'B Minor': { root: 71, type: 'MINOR', sharps: 2 },

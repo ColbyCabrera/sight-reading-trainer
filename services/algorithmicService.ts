@@ -469,6 +469,13 @@ export const generateAlgorithmicSheetMusic = (
 
   // 1. CONFIGURATION
   const settings = customSettings || getSettingsForLevel(difficulty);
+
+  // Resolve RANDOM coordination
+  let effectiveCoordination = settings.handCoordination;
+  if (effectiveCoordination === 'RANDOM') {
+    effectiveCoordination = Math.random() < 0.5 ? 'SEPARATE' : 'PARALLEL';
+  }
+
   const internalProfile = getInternalProfile(difficulty);
 
   let keyName = selectedKey;
@@ -501,7 +508,7 @@ export const generateAlgorithmicSheetMusic = (
   // Determine which hand plays the melody (relevant for Separate, Parallel, Independent)
   const handAssignments: ('RH' | 'LH')[] = [];
 
-  if (settings.handCoordination === 'SEPARATE') {
+  if (effectiveCoordination === 'SEPARATE') {
     // In Separate mode, we alternate who has the melody, the other hand rests.
     let currentHand: 'RH' | 'LH' = 'RH'; // Start with RH usually
     let barsRemainingInPhrase = 0;
@@ -575,7 +582,7 @@ export const generateAlgorithmicSheetMusic = (
     melodySourceMeasures.push(melodyMeasure);
 
     // Populate RH Part
-    if (settings.handCoordination === 'SEPARATE' && activeHand === 'LH') {
+    if (effectiveCoordination === 'SEPARATE' && activeHand === 'LH') {
       // RH takes a rest here
       rhMeasures.push({
         tokens: [{ type: 'rest', pitch: 0, duration: timeSignature === '4/4' ? 4 : 3 }],
@@ -589,12 +596,13 @@ export const generateAlgorithmicSheetMusic = (
   });
 
   // -- Left Hand (Accompaniment) --
+  const resolvedSettings = { ...settings, handCoordination: effectiveCoordination };
   const lhMeasures = accompanimentGen.generate(
     melodySourceMeasures,
     numMeasures,
     chordProgression,
     timeSignature,
-    settings,
+    resolvedSettings,
     handAssignments
   );
 
@@ -618,7 +626,7 @@ export const generateAlgorithmicSheetMusic = (
     difficulty,
     key: keyName,
     timeSignature,
-    description: `${settings.handCoordination} Motion - ${settings.rhythmComplexity} Rhythm`,
+    description: `${effectiveCoordination} Motion - ${settings.rhythmComplexity} Rhythm`,
     abcNotation: AbcEngraver.render(score)
   };
 };

@@ -8,7 +8,7 @@ export type GenerationMode = 'AI' | 'Algorithm';
 export interface GenerationSettings {
   maxInterval: number;
   rhythmComplexity: 'SIMPLE' | 'INTERMEDIATE' | 'COMPLEX';
-  handCoordination: 'SEPARATE' | 'PARALLEL' | 'INDEPENDENT';
+  handCoordination: 'SEPARATE' | 'PARALLEL' | 'INDEPENDENT' | 'RANDOM';
   accompanimentStyle: 'BLOCK' | 'BROKEN' | 'ALBERTI' | 'WALTZ' | 'STRIDE' | 'MIXED' | 'NONE';
   playability: '5-FINGER' | 'OCTAVE' | 'LARGE';
 }

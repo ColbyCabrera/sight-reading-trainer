@@ -161,7 +161,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   if (level === 2) return {
     maxInterval: 3,
     rhythmComplexity: 'SIMPLE',
-    handCoordination: 'PARALLEL',
+    handCoordination: 'RANDOM',
     accompanimentStyle: 'NONE',
     playability: '5-FINGER'
   };

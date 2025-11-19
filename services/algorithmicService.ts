@@ -31,15 +31,21 @@ const getInternalProfile = (level: DifficultyLevel): InternalDifficultyProfile =
 };
 
 // --- STAGE 2: GENERATORS ---
-
 class RhythmGenerator {
-  static generate(measures: number, timeSig: '4/4' | '3/4', complexity: 'SIMPLE' | 'INTERMEDIATE' | 'COMPLEX'): number[][] {
-    const patterns = RHYTHM_PATTERNS[timeSig][complexity];
+  static generate(measures: number, timeSig: '4/4' | '3/4', complexity: number, variance: number): number[][] {
+    const levelPatterns = RHYTHM_PATTERNS[timeSig][complexity] || RHYTHM_PATTERNS[timeSig][1];
 
     const rhythmStream: number[][] = [];
 
-    const motifA = getRandomElement(patterns);
-    const motifB = getRandomElement(patterns);
+    // Helper to pick pattern based on variance
+    const getPattern = () => {
+      const useRare = Math.random() < variance;
+      const source = useRare ? levelPatterns.rare : levelPatterns.common;
+      return getRandomElement(source);
+    };
+
+    const motifA = getPattern();
+    const motifB = getPattern();
 
     for (let i = 0; i < measures; i++) {
       if (i === measures - 1) {
@@ -544,7 +550,7 @@ export const generateAlgorithmicSheetMusic = (
   const rhMeasures: Measure[] = []; // Final RH part
 
   // Generate abstract rhythm & pitch stream first
-  const rhRhythms = RhythmGenerator.generate(numMeasures, timeSignature, settings.rhythmComplexity);
+  const rhRhythms = RhythmGenerator.generate(numMeasures, timeSignature, settings.rhythmComplexity, settings.rhythmVariance);
 
   let prevPitch = keyData.root + 12; // Start around C5
   let prevInterval = 0;
@@ -627,7 +633,7 @@ export const generateAlgorithmicSheetMusic = (
     difficulty,
     key: keyName,
     timeSignature,
-    description: `${effectiveCoordination} Motion - ${settings.rhythmComplexity} Rhythm`,
+    description: `${effectiveCoordination} Motion - Level ${settings.rhythmComplexity} Rhythm`,
     abcNotation: AbcEngraver.render(score)
   };
 };

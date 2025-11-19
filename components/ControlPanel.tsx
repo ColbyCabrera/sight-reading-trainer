@@ -131,21 +131,30 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
               {/* Rhythm */}
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">Rhythm Complexity</label>
-                <div className="flex gap-1">
-                  {['SIMPLE', 'INTERMEDIATE', 'COMPLEX'].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => updateSetting('rhythmComplexity', r)}
-                      className={`flex-1 py-1 text-[10px] rounded border ${settings.rhythmComplexity === r
-                        ? 'bg-indigo-100 border-indigo-300 text-indigo-700 font-bold'
-                        : 'bg-white border-stone-200 text-stone-500'
-                        }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-semibold text-stone-600">Rhythm Complexity</span>
+                  <span className="text-stone-500">Level {settings.rhythmComplexity}</span>
                 </div>
+                <input
+                  type="range" min="1" max="10" step="1"
+                  value={settings.rhythmComplexity}
+                  onChange={(e) => updateSetting('rhythmComplexity', Number(e.target.value))}
+                  className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+
+              {/* Rhythm Variance */}
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-semibold text-stone-600">Rhythm Variance (Rare Patterns)</span>
+                  <span className="text-stone-500">{Math.round(settings.rhythmVariance * 100)}%</span>
+                </div>
+                <input
+                  type="range" min="0" max="1" step="0.05"
+                  value={settings.rhythmVariance}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('rhythmVariance', Number(e.target.value))}
+                  className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
               </div>
 
               {/* Max Interval */}

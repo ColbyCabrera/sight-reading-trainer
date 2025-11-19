@@ -60,33 +60,61 @@ export const PROGRESSIONS = {
 };
 
 // Rhythmic Templates (Duration in beats)
-export const RHYTHM_PATTERNS = {
+// Organized by Time Signature -> Level (1-10) -> { common: [], rare: [] }
+export const RHYTHM_PATTERNS: Record<string, Record<number, { common: number[][], rare: number[][] }>> = {
   '4/4': {
-    SIMPLE: [
-      [1, 1, 1, 1],
-      [2, 1, 1],
-      [1, 1, 2],
-      [4],
-      [2, 2]
-    ],
-    INTERMEDIATE: [
-      [1.5, 0.5, 1, 1],
-      [1, 0.5, 0.5, 2],
-      [0.5, 0.5, 0.5, 0.5, 1, 1],
-      [1, 1, 1.5, 0.5],
-    ],
-    COMPLEX: [
-      [0.75, 0.25, 1, 1, 1],
-      [0.5, 1, 0.5, 1, 1],
-      [1, 0.5, 1, 0.5, 1],
-      [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-      [1.5, 1.5, 1],
-    ]
+    1: { // Whole notes, Half notes
+      common: [[4], [2, 2]],
+      rare: [[2, 1, 1], [1, 1, 2]]
+    },
+    2: { // Quarter notes introduced
+      common: [[2, 2], [1, 1, 1, 1]],
+      rare: [[2, 1, 1], [1, 1, 2]]
+    },
+    3: { // Dotted half
+      common: [[3, 1], [1, 3]],
+      rare: [[1, 1, 1, 1], [2, 1, 1]]
+    },
+    4: { // Eighth notes (pairs)
+      common: [[1, 1, 1, 1], [2, 1, 1]],
+      rare: [[1, 1, 0.5, 0.5, 1], [0.5, 0.5, 1, 2]]
+    },
+    5: { // Dotted quarter + eighth
+      common: [[1.5, 0.5, 2], [2, 1.5, 0.5]],
+      rare: [[1.5, 0.5, 1, 1], [1, 1, 1.5, 0.5]]
+    },
+    6: { // Syncopation basics
+      common: [[0.5, 1, 0.5, 2], [1, 1.5, 0.5, 1]],
+      rare: [[0.5, 1, 1, 1, 0.5], [1.5, 1.5, 1]]
+    },
+    7: { // More eighths
+      common: [[0.5, 0.5, 0.5, 0.5, 1, 1], [1, 0.5, 0.5, 0.5, 0.5, 1]],
+      rare: [[0.5, 0.5, 1, 0.5, 0.5, 1], [0.75, 0.25, 1, 2]]
+    },
+    8: { // Sixteenths introduced (simple)
+      common: [[1, 1, 0.25, 0.25, 0.25, 0.25, 1], [0.25, 0.25, 0.25, 0.25, 1, 2]],
+      rare: [[0.75, 0.25, 1, 1, 1], [1, 0.75, 0.25, 2]]
+    },
+    9: { // Complex syncopation & 16ths
+      common: [[0.75, 0.25, 0.5, 0.5, 1, 1], [0.5, 1, 0.5, 0.25, 0.25, 0.25, 0.25, 0.5, 0.5]],
+      rare: [[0.25, 0.5, 0.25, 1, 1, 1], [1.5, 0.25, 0.25, 2]]
+    },
+    10: { // Very complex
+      common: [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 1, 1], [0.75, 0.25, 0.75, 0.25, 0.75, 0.25, 1]],
+      rare: [[0.25, 0.75, 0.25, 0.75, 1, 1], [0.5, 0.25, 0.25, 0.5, 0.25, 0.25, 1, 1]]
+    }
   },
   '3/4': {
-    SIMPLE: [[1, 1, 1], [2, 1], [1, 2], [3]],
-    INTERMEDIATE: [[1.5, 0.5, 1], [1, 0.5, 0.5, 1], [0.5, 0.5, 1, 1]],
-    COMPLEX: [[0.5, 0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 0.5, 0.5, 0.5], [0.5, 1, 0.5, 1]]
+    1: { common: [[3], [2, 1]], rare: [[1, 2], [1, 1, 1]] },
+    2: { common: [[1, 1, 1], [2, 1]], rare: [[1, 2], [1, 1, 1]] },
+    3: { common: [[1.5, 0.5, 1], [1, 1.5, 0.5]], rare: [[0.5, 0.5, 1, 1]] },
+    4: { common: [[1, 0.5, 0.5, 1], [0.5, 0.5, 1, 1]], rare: [[1.5, 0.5, 1]] },
+    5: { common: [[1.5, 0.5, 1], [0.5, 1, 0.5, 1]], rare: [[1, 0.5, 0.5, 0.5, 0.5]] },
+    6: { common: [[0.5, 0.5, 0.5, 0.5, 1], [1.5, 1.5]], rare: [[0.5, 1, 1.5]] },
+    7: { common: [[0.75, 0.25, 1, 1], [1, 0.75, 0.25, 1]], rare: [[0.25, 0.25, 0.25, 0.25, 1, 1]] },
+    8: { common: [[0.25, 0.25, 0.25, 0.25, 1, 1], [0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 1]], rare: [[0.75, 0.25, 0.75, 0.25, 1]] },
+    9: { common: [[0.25, 0.5, 0.25, 1, 1], [1, 0.25, 0.5, 0.25, 1]], rare: [[0.5, 0.25, 0.25, 0.5, 0.25, 0.25, 1]] },
+    10: { common: [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 1], [0.75, 0.25, 0.75, 0.25, 0.75, 0.25]], rare: [[0.25, 0.75, 0.25, 0.75, 1]] }
   }
 };
 
@@ -151,7 +179,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 1: Hands Separate (Alternating), Simple Rhythm, 5-finger
   if (level === 1) return {
     maxInterval: 2,
-    rhythmComplexity: 'SIMPLE',
+    rhythmComplexity: 1,
+    rhythmVariance: 0.2,
     handCoordination: 'SEPARATE',
     accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
@@ -160,7 +189,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 2: Parallel Motion (Hands locked), Simple Rhythm
   if (level === 2) return {
     maxInterval: 3,
-    rhythmComplexity: 'SIMPLE',
+    rhythmComplexity: 2,
+    rhythmVariance: 0.3,
     handCoordination: 'RANDOM',
     accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
@@ -169,7 +199,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 3: First Hands Together (Independent), Simple Block Chords
   if (level === 3) return {
     maxInterval: 4,
-    rhythmComplexity: 'SIMPLE',
+    rhythmComplexity: 3,
+    rhythmVariance: 0.3,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: '5-FINGER'
@@ -178,7 +209,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 4: Hands Together, Faster Rhythms (Eighth notes)
   if (level === 4) return {
     maxInterval: 5,
-    rhythmComplexity: 'INTERMEDIATE',
+    rhythmComplexity: 4,
+    rhythmVariance: 0.4,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['BROKEN'], // Simple broken chords
     playability: 'OCTAVE'
@@ -187,7 +219,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 5: More variation
   if (level === 5) return {
     maxInterval: 6,
-    rhythmComplexity: 'INTERMEDIATE',
+    rhythmComplexity: 5,
+    rhythmVariance: 0.5,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['WALTZ'],
     playability: 'OCTAVE'
@@ -196,7 +229,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 6-7
   if (level <= 7) return {
     maxInterval: 8,
-    rhythmComplexity: 'COMPLEX',
+    rhythmComplexity: level as DifficultyLevel,
+    rhythmVariance: 0.6,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['ALBERTI'],
     playability: 'OCTAVE'
@@ -205,7 +239,8 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 8+
   return {
     maxInterval: 12,
-    rhythmComplexity: 'COMPLEX',
+    rhythmComplexity: level as DifficultyLevel,
+    rhythmVariance: 0.7,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['STRIDE'],
     playability: 'LARGE'

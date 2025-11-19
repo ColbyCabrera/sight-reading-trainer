@@ -23,7 +23,8 @@ const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (m
 const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const getInternalProfile = (level: DifficultyLevel): InternalDifficultyProfile => {
-  if (level <= 2) return INTERNAL_PROFILES[1];
+  if (level == 1) return INTERNAL_PROFILES[1];
+  if (level == 2) return INTERNAL_PROFILES[2];
   if (level <= 4) return INTERNAL_PROFILES[3];
   if (level <= 7) return INTERNAL_PROFILES[5];
   return INTERNAL_PROFILES[8];

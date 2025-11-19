@@ -68,7 +68,7 @@ export const RHYTHM_PATTERNS: Record<string, Record<number, { common: number[][]
       rare: [[2, 1, 1], [1, 1, 2]]
     },
     2: { // Quarter notes introduced
-      common: [[1, 1, 1, 1], [1, 1, 2],],
+      common: [[1, 1, 1, 1], [1, 1, 2]],
       rare: [[2, 1, 1], [2, 2], [4]]
     },
     3: { // Dotted half

@@ -200,7 +200,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   if (level === 3) return {
     maxInterval: 4,
     rhythmComplexity: 3,
-    rhythmVariance: 0.1,
+    rhythmVariance: 0.4,
     handCoordination: 'RANDOM',
     accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: 'OCTAVE'

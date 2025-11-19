@@ -110,21 +110,21 @@ export interface InternalDifficultyProfile {
 // Base internal configs that don't change with user sliders
 export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
   1: { // Level 1
-    rangeLH: [48, 60], rangeRH: [60, 79],
+    rangeLH: [43, 60], rangeRH: [59, 79],
     maxLeapProb: 0.1, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
     costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 10 }
   },
   2: { // Level 2
-    rangeLH: [48, 60], rangeRH: [60, 79],
+    rangeLH: [48, 60], rangeRH: [60, 76],
     maxLeapProb: 0.1, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
-    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 10 }
+    costs: { leapPenalty: 20, dissonancePenalty: 100, directionChangeBonus: 10, repetitionPenalty: 15 }
   },
   3: { // Level 3-4
-    rangeLH: [41, 62], rangeRH: [60, 77], // Lowered LH max to 62, RH min kept at 57
+    rangeLH: [41, 62], rangeRH: [60, 77],
     maxLeapProb: 0.2, syncopationProb: 0.05,
     accidentalsAllowed: true,
     chordComplexity: 'TRIAD',

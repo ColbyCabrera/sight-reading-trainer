@@ -114,11 +114,11 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
     maxLeapProb: 0.1, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
-    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 10 }
+    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 16 }
   },
   2: { // Level 2
     rangeLH: [48, 60], rangeRH: [60, 76],
-    maxLeapProb: 0.1, syncopationProb: 0,
+    maxLeapProb: 0.3, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
     costs: { leapPenalty: 20, dissonancePenalty: 100, directionChangeBonus: 10, repetitionPenalty: 15 }

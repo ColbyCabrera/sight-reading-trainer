@@ -68,8 +68,8 @@ export const RHYTHM_PATTERNS: Record<string, Record<number, { common: number[][]
       rare: [[2, 1, 1], [1, 1, 2]]
     },
     2: { // Quarter notes introduced
-      common: [[2, 2], [1, 1, 1, 1]],
-      rare: [[2, 1, 1], [1, 1, 2]]
+      common: [[1, 1, 1, 1], [1, 1, 2],],
+      rare: [[2, 1, 1], [2, 2], [4]]
     },
     3: { // Dotted half
       common: [[3, 1], [1, 3]],
@@ -180,13 +180,13 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   if (level === 1) return {
     maxInterval: 2,
     rhythmComplexity: 1,
-    rhythmVariance: 0.2,
+    rhythmVariance: 0.8,
     handCoordination: 'SEPARATE',
     accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
   };
 
-  // Level 2: Parallel Motion (Hands locked), Simple Rhythm
+  // Level 2: Add Parallel Motion (Hands locked), Simple Rhythm
   if (level === 2) return {
     maxInterval: 3,
     rhythmComplexity: 2,
@@ -200,14 +200,22 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   if (level === 3) return {
     maxInterval: 4,
     rhythmComplexity: 3,
+    rhythmVariance: 0.1,
+    handCoordination: 'RANDOM',
+    accompanimentStyle: ['BLOCK', 'BROKEN'],
+    playability: 'OCTAVE'
+  };
+
+  if (level === 4) return {
+    maxInterval: 4,
+    rhythmComplexity: 3,
     rhythmVariance: 0.3,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: '5-FINGER'
   };
 
-  // Level 4: Hands Together, Faster Rhythms (Eighth notes)
-  if (level === 4) return {
+  if (level === 5) return {
     maxInterval: 5,
     rhythmComplexity: 4,
     rhythmVariance: 0.4,
@@ -217,7 +225,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   };
 
   // Level 5: More variation
-  if (level === 5) return {
+  if (level === 6) return {
     maxInterval: 6,
     rhythmComplexity: 5,
     rhythmVariance: 0.5,

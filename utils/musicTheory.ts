@@ -153,7 +153,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 2,
     rhythmComplexity: 'SIMPLE',
     handCoordination: 'SEPARATE',
-    accompanimentStyle: 'NONE',
+    accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
   };
 
@@ -162,7 +162,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 3,
     rhythmComplexity: 'SIMPLE',
     handCoordination: 'RANDOM',
-    accompanimentStyle: 'NONE',
+    accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
   };
 
@@ -171,7 +171,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 4,
     rhythmComplexity: 'SIMPLE',
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'BLOCK',
+    accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: '5-FINGER'
   };
 
@@ -180,7 +180,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 5,
     rhythmComplexity: 'INTERMEDIATE',
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'BROKEN', // Simple broken chords
+    accompanimentStyle: ['BROKEN'], // Simple broken chords
     playability: 'OCTAVE'
   };
 
@@ -189,7 +189,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 6,
     rhythmComplexity: 'INTERMEDIATE',
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'WALTZ',
+    accompanimentStyle: ['WALTZ'],
     playability: 'OCTAVE'
   };
 
@@ -198,7 +198,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 8,
     rhythmComplexity: 'COMPLEX',
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'ALBERTI',
+    accompanimentStyle: ['ALBERTI'],
     playability: 'OCTAVE'
   };
 
@@ -207,7 +207,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     maxInterval: 12,
     rhythmComplexity: 'COMPLEX',
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'STRIDE',
+    accompanimentStyle: ['STRIDE'],
     playability: 'LARGE'
   };
 };

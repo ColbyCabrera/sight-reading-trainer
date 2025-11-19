@@ -172,6 +172,8 @@ class AccompanimentGenerator {
     const lhMeasures: Measure[] = [];
     const internalProfile = this.engine.profile;
 
+    let style = getRandomElement(settings.accompanimentStyle);
+
     progression.forEach((chordDegree, mIdx) => {
       const isFinalMeasure = mIdx === measures - 1;
       let tokens: NoteToken[] = [];
@@ -210,7 +212,6 @@ class AccompanimentGenerator {
 
       // STRATEGY: INDEPENDENT (Level 3+)
 
-      let style = settings.accompanimentStyle;
       if (style === 'MIXED') style = timeSig === '3/4' ? 'WALTZ' : 'BROKEN';
       if (style === 'NONE') style = 'BLOCK'; // Fallback if independent but style is none
       if (isFinalMeasure) style = 'BLOCK';

@@ -164,19 +164,32 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
               {/* Accompaniment Style */}
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">Accompaniment Style</label>
-                <select
-                  value={settings.accompanimentStyle}
-                  onChange={(e) => updateSetting('accompanimentStyle', e.target.value)}
-                  disabled={settings.handCoordination !== 'INDEPENDENT'}
-                  className="w-full text-xs p-2 rounded border border-stone-300 disabled:opacity-50"
-                >
-                  <option value="BLOCK">Block Chords</option>
-                  <option value="BROKEN">Broken Chords</option>
-                  <option value="ALBERTI">Alberti Bass</option>
-                  <option value="WALTZ">Waltz (Oom-pah)</option>
-                  <option value="STRIDE">Stride</option>
-                </select>
+                <label className="block text-xs font-semibold text-stone-600 mb-1">Accompaniment Style (Pool)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['BLOCK', 'BROKEN', 'ALBERTI', 'WALTZ', 'STRIDE'].map((style) => (
+                    <label key={style} className="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(settings.accompanimentStyle as string[]).includes(style)}
+                        onChange={(e) => {
+                          const currentStyles = settings.accompanimentStyle as string[];
+                          let newStyles;
+                          if (e.target.checked) {
+                            newStyles = [...currentStyles, style];
+                          } else {
+                            newStyles = currentStyles.filter(s => s !== style);
+                          }
+                          // Prevent empty selection
+                          if (newStyles.length === 0) newStyles = ['BLOCK'];
+                          updateSetting('accompanimentStyle', newStyles);
+                        }}
+                        disabled={settings.handCoordination !== 'INDEPENDENT'}
+                        className="rounded border-stone-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      {style.charAt(0) + style.slice(1).toLowerCase()}
+                    </label>
+                  ))}
+                </div>
               </div>
 
             </div>

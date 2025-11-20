@@ -45,7 +45,14 @@ class RhythmGenerator {
     };
 
     const motifA = getPattern();
-    const motifB = getPattern();
+    let motifB = getPattern();
+
+    // Ensure motifs are distinct
+    let attempts = 0;
+    while (JSON.stringify(motifA) === JSON.stringify(motifB) && attempts < 10) {
+      motifB = getPattern();
+      attempts++;
+    }
 
     for (let i = 0; i < measures; i++) {
       if (i === measures - 1) {

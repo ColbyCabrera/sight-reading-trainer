@@ -71,13 +71,13 @@ export const RHYTHM_PATTERNS: Record<string, Record<number, { common: number[][]
       common: [[1, 1, 1, 1], [1, 1, 2]],
       rare: [[2, 1, 1], [2, 2], [4]]
     },
-    3: { // Dotted half
-      common: [[3, 1], [1, 3]],
-      rare: [[1, 1, 1, 1], [2, 1, 1]]
+    3: { // Add dotted half notes and dotted quarter notes
+      common: [[3, 1], [1, 1, 1, 1], [2, 1, 1]],
+      rare: [[1.5, 0.5, 2], [1, 1, 2], [1, 3], [1, 1.5, 0.5, 1]]
     },
     4: { // Eighth notes (pairs)
       common: [[1, 1, 1, 1], [2, 1, 1]],
-      rare: [[1, 1, 0.5, 0.5, 1], [0.5, 0.5, 1, 2]]
+      rare: [[1, 1, 0.5, 0.5, 1], [0.5, 0.5, 1, 2], [2, 1.5, 0.5]]
     },
     5: { // Dotted quarter + eighth
       common: [[1.5, 0.5, 2], [2, 1.5, 0.5]],

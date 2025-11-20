@@ -151,7 +151,7 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
     chordComplexity: 'SHELL',
     costs: { leapPenalty: 20, dissonancePenalty: 100, directionChangeBonus: 10, repetitionPenalty: 15 }
   },
-  3: { // Level 3-4
+  3: { // Level 3
     rangeLH: [41, 62], rangeRH: [60, 77],
     maxLeapProb: 0.5, syncopationProb: 0.05,
     accidentalsAllowed: true,
@@ -198,7 +198,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
 
   // Level 3: First Hands Together (Independent), Simple Block Chords
   if (level === 3) return {
-    maxInterval: 4,
+    maxInterval: 6,
     rhythmComplexity: 3,
     rhythmVariance: 0.6,
     handCoordination: 'RANDOM',

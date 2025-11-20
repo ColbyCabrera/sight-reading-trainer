@@ -158,6 +158,13 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
     chordComplexity: 'SHELL',
     costs: { leapPenalty: 5, dissonancePenalty: 60, directionChangeBonus: 30, repetitionPenalty: 25 }
   },
+  4: { // Level 4 uses reduced complexity so hands together transition is easier
+    rangeLH: [41, 62], rangeRH: [60, 77],
+    maxLeapProb: 0.2, syncopationProb: 0.05,
+    accidentalsAllowed: true,
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 15, dissonancePenalty: 60, directionChangeBonus: 10, repetitionPenalty: 15 }
+  },
   5: { // Level 5-7
     rangeLH: [36, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
     maxLeapProb: 0.5, syncopationProb: 0.3,
@@ -196,7 +203,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     playability: '5-FINGER'
   };
 
-  // Level 3: First Hands Together (Independent), Simple Block Chords
+  // Level 3: add more complexity
   if (level === 3) return {
     maxInterval: 6,
     rhythmComplexity: 3,
@@ -206,9 +213,10 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     playability: 'OCTAVE'
   };
 
+  // Level 4: First Hands Together (Independent), Simple Block Chords
   if (level === 4) return {
     maxInterval: 4,
-    rhythmComplexity: 3,
+    rhythmComplexity: 2,
     rhythmVariance: 0.3,
     handCoordination: 'INDEPENDENT',
     accompanimentStyle: ['BLOCK', 'BROKEN'],

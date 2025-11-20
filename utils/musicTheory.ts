@@ -223,12 +223,13 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     playability: '5-FINGER'
   };
 
+  // Level 5: More variation and complexity
   if (level === 5) return {
     maxInterval: 5,
-    rhythmComplexity: 4,
+    rhythmComplexity: 3,
     rhythmVariance: 0.4,
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: ['BROKEN'], // Simple broken chords
+    accompanimentStyle: ['MIXED', 'BLOCK', 'ALBERTI'],
     playability: 'OCTAVE'
   };
 

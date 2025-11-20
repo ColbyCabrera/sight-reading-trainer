@@ -165,12 +165,12 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
     chordComplexity: 'SHELL',
     costs: { leapPenalty: 15, dissonancePenalty: 60, directionChangeBonus: 10, repetitionPenalty: 15 }
   },
-  5: { // Level 5-7
-    rangeLH: [36, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
+  5: { // Level 5 - More variation, less constraints
+    rangeLH: [40, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
     maxLeapProb: 0.5, syncopationProb: 0.3,
     accidentalsAllowed: true,
     chordComplexity: 'FULL',
-    costs: { leapPenalty: 10, dissonancePenalty: 40, directionChangeBonus: 40, repetitionPenalty: 20 }
+    costs: { leapPenalty: 20, dissonancePenalty: 40, directionChangeBonus: 40, repetitionPenalty: 20 }
   },
   8: { // Level 8-10
     rangeLH: [36, 67], rangeRH: [55, 88], // RH min set to 60

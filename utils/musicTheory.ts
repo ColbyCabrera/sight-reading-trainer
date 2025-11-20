@@ -153,10 +153,10 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
   },
   3: { // Level 3-4
     rangeLH: [41, 62], rangeRH: [60, 77],
-    maxLeapProb: 0.2, syncopationProb: 0.05,
+    maxLeapProb: 0.5, syncopationProb: 0.05,
     accidentalsAllowed: true,
-    chordComplexity: 'TRIAD',
-    costs: { leapPenalty: 20, dissonancePenalty: 60, directionChangeBonus: 20, repetitionPenalty: 10 }
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 5, dissonancePenalty: 60, directionChangeBonus: 30, repetitionPenalty: 25 }
   },
   5: { // Level 5-7
     rangeLH: [36, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
@@ -200,7 +200,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   if (level === 3) return {
     maxInterval: 4,
     rhythmComplexity: 3,
-    rhythmVariance: 0.4,
+    rhythmVariance: 0.6,
     handCoordination: 'RANDOM',
     accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: 'OCTAVE'

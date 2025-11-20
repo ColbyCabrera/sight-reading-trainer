@@ -202,7 +202,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     rhythmComplexity: 3,
     rhythmVariance: 0.6,
     handCoordination: 'RANDOM',
-    accompanimentStyle: ['BLOCK', 'BROKEN'],
+    accompanimentStyle: ['NONE'],
     playability: 'OCTAVE'
   };
 

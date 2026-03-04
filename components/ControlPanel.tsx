@@ -76,12 +76,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
       <div className="mb-8">
         <div className="flex justify-between items-end mb-3">
-          <label className="text-sm font-semibold text-stone-600">Difficulty Level</label>
+          <label htmlFor="difficulty" className="text-sm font-semibold text-stone-600">Difficulty Level</label>
           <span className="text-3xl font-bold text-amber-700 font-heading leading-none">{difficulty}</span>
         </div>
 
         <div className="relative pt-1">
           <input
+            id="difficulty"
             type="range"
             min="1"
             max="10"
@@ -120,8 +121,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
               {/* Hand Coordination */}
               <div>
-                <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2">Hand Coordination</label>
+                <label htmlFor="handCoordination" className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2">Hand Coordination</label>
                 <select
+                  id="handCoordination"
                   value={settings.handCoordination}
                   onChange={(e) => updateSetting('handCoordination', e.target.value)}
                   className="w-full text-sm p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium appearance-none"
@@ -137,10 +139,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               {/* Rhythm */}
               <div>
                 <div className="flex justify-between text-[11px] mb-2">
-                  <span className="font-bold text-stone-500 uppercase tracking-widest">Rhythm Complexity</span>
+                  <label htmlFor="rhythmComplexity" className="font-bold text-stone-500 uppercase tracking-widest">Rhythm Complexity</label>
                   <span className="text-amber-700 font-bold">Lvl {settings.rhythmComplexity}</span>
                 </div>
                 <input
+                  id="rhythmComplexity"
                   type="range" min="1" max="10" step="1"
                   value={settings.rhythmComplexity}
                   onChange={(e) => updateSetting('rhythmComplexity', Number(e.target.value) as DifficultyLevel)}
@@ -151,10 +154,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               {/* Rhythm Variance */}
               <div>
                 <div className="flex justify-between text-[11px] mb-2">
-                  <span className="font-bold text-stone-500 uppercase tracking-widest">Rhythm Variance</span>
+                  <label htmlFor="rhythmVariance" className="font-bold text-stone-500 uppercase tracking-widest">Rhythm Variance</label>
                   <span className="text-amber-700 font-bold">{Math.round(settings.rhythmVariance * 100)}%</span>
                 </div>
                 <input
+                  id="rhythmVariance"
                   type="range" min="0" max="1" step="0.05"
                   value={settings.rhythmVariance}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('rhythmVariance', Number(e.target.value))}
@@ -165,10 +169,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               {/* Max Interval */}
               <div>
                 <div className="flex justify-between text-[11px] mb-2">
-                  <span className="font-bold text-stone-500 uppercase tracking-widest">Max Leap Interval</span>
+                  <label htmlFor="maxInterval" className="font-bold text-stone-500 uppercase tracking-widest">Max Leap Interval</label>
                   <span className="text-stone-600 font-bold">{settings.maxInterval} semi</span>
                 </div>
                 <input
+                  id="maxInterval"
                   type="range" min="1" max="12" step="1"
                   value={settings.maxInterval}
                   onChange={(e) => updateSetting('maxInterval', Number(e.target.value))}
@@ -178,7 +183,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
               {/* Accompaniment Style */}
               <div>
-                <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">Accompaniment Pools</label>
+                <div className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">Accompaniment Pools</div>
                 <div className="grid grid-cols-2 gap-2">
                   {(['BLOCK', 'BROKEN', 'ALBERTI', 'WALTZ', 'STRIDE'] as const).map((style) => {
                     const currentStyles = settings.accompanimentStyle;
@@ -216,8 +221,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       )}
 
       <div className="mb-10">
-        <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2">Musical Key</label>
+        <label htmlFor="musicalKey" className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2">Musical Key</label>
         <select
+          id="musicalKey"
           value={selectedKey}
           onChange={(e) => onKeyChange(e.target.value as MusicalKey)}
           disabled={isLoading}

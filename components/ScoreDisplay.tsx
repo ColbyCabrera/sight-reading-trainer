@@ -37,28 +37,34 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
           synthControlRef.current = synthControl;
 
           synthControl.load(midiContainer, null, {
-             displayLoop: true,
-             displayRestart: true,
-             displayPlay: true,
-             displayProgress: true,
-             displayWarp: true
+            displayLoop: true,
+            displayRestart: true,
+            displayPlay: true,
+            displayProgress: true,
+            displayWarp: true
           });
-          
+
           const createSynth = new window.ABCJS.synth.CreateSynth();
           createSynthRef.current = createSynth;
 
           createSynth.init({ visualObj: visualObj[0] }).then(() => {
             // chordsOff: true prevents ABCJS from playing chord symbols (C, G7) automatically
             // if they existed in the text, but we generate notes explicitly so this is safe.
-            synthControl.setTune(visualObj[0], false, { 
+            synthControl.setTune(visualObj[0], false, {
               chordsOff: true,
               midiVol: 100 // Ensure dynamics are audible
+            }).then(() => {
+              // Fix accessibility error: ABCJS tempo input lacks an id or name
+              const tempoInput = midiContainer.querySelector('.abcjs-midi-tempo');
+              if (tempoInput && !tempoInput.id) {
+                tempoInput.id = 'abcjs-tempo-input';
+              }
             });
           }).catch((error: any) => {
             console.warn("Audio problem:", error);
           });
         } else {
-            midiContainer.innerHTML = "<div class='text-xs text-red-400'>Audio not supported in this browser.</div>";
+          midiContainer.innerHTML = "<div class='text-xs text-red-400'>Audio not supported in this browser.</div>";
         }
       }
     }
@@ -87,9 +93,9 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div 
-        ref={scoreRef} 
-        className="w-full text-center min-h-[300px]" 
+      <div
+        ref={scoreRef}
+        className="w-full text-center min-h-[300px]"
       />
     </div>
   );

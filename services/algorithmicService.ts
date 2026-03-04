@@ -33,15 +33,23 @@ const getInternalProfile = (level: DifficultyLevel): InternalDifficultyProfile =
 // --- STAGE 2: GENERATORS ---
 class RhythmGenerator {
   static generate(measures: number, timeSig: '4/4' | '3/4', complexity: number, variance: number): number[][] {
-    const levelPatterns = RHYTHM_PATTERNS[timeSig][complexity] || RHYTHM_PATTERNS[timeSig][1];
+    const levelPatterns = RHYTHM_PATTERNS[timeSig]?.[complexity] || RHYTHM_PATTERNS[timeSig]?.[1] || { common: [[1]], rare: [[1]] };
 
     const rhythmStream: number[][] = [];
 
     // Helper to pick pattern based on variance
     const getPattern = () => {
       const useRare = Math.random() < variance;
-      const source = useRare ? levelPatterns.rare : levelPatterns.common;
-      return getRandomElement(source);
+      let source = useRare ? levelPatterns.rare : levelPatterns.common;
+
+      // Fallback to the other array if the chosen one is invalid
+      if (!Array.isArray(source) || source.length === 0) {
+        source = useRare ? levelPatterns.common : levelPatterns.rare;
+      }
+
+      // Ultimate fallback
+      const safeSource = Array.isArray(source) && source.length > 0 ? source : [[1]];
+      return getRandomElement(safeSource);
     };
 
     const motifA = getPattern();

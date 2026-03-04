@@ -233,7 +233,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     playability: 'OCTAVE'
   };
 
-  // Level 5: More variation
+  // Level 6: More variation
   if (level === 6) return {
     maxInterval: 6,
     rhythmComplexity: 5,
@@ -243,7 +243,7 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
     playability: 'OCTAVE'
   };
 
-  // Level 6-7
+  // Level 7
   if (level <= 7) return {
     maxInterval: 8,
     rhythmComplexity: level as DifficultyLevel,

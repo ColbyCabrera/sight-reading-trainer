@@ -173,7 +173,7 @@ const App: React.FC = () => {
               {/* Actual Music Sheet */}
               <div className="flex-grow p-4 sm:p-8 flex flex-col items-center justify-start overflow-auto music-container bg-transparent relative">
                 {/* Subtle paper grain effect overlay */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]"></div>
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply bg-[url('/cream-paper.png')]"></div>
 
                 {exercise && (
                   <div className="w-full relative z-10 filter drop-shadow-sm transition-opacity duration-500">
@@ -181,7 +181,7 @@ const App: React.FC = () => {
                   </div>
                 )}
 
-                {!exercise && !loadingState && !error && (
+                {!exercise && loadingState === 'idle' && !error && (
                   <div className="flex flex-col items-center justify-center h-full text-slate-300 relative z-10">
                     <svg className="w-24 h-24 mb-6 opacity-30 drop-shadow-sm" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />

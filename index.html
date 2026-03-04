@@ -1,223 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtuoso Sight-Reading</title>
+    <!-- ABCJS for rendering music notation -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"
+      integrity="sha384-5nqtJ2Sc/D/Haeh8FXSBRRMme+jBO3p3Bk3yYsRQLrYEO7XIJwx/mDt+BEVN9Hda"
+      crossorigin="anonymous"
+    ></script>
+    <!-- ABCJS Audio CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/abcjs@6.2.2/abcjs-audio.css"
+      integrity="sha384-eK1u60r2vqfWom2CLxO79qAvQKkjn5j1PjFslU5/+6gScaYuFJ92tkZ1N4z0hXbF"
+      crossorigin="anonymous"
+    />
+    <!-- Google Fonts: preconnect for early DNS/TCP/TLS — improves font load performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virtuoso Sight-Reading</title>
-  <!-- ABCJS for rendering music notation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"
-    integrity="sha384-5nqtJ2Sc/D/Haeh8FXSBRRMme+jBO3p3Bk3yYsRQLrYEO7XIJwx/mDt+BEVN9Hda"
-    crossorigin="anonymous"></script>
-  <!-- ABCJS Audio CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.2.2/abcjs-audio.css"
-    integrity="sha384-eK1u60r2vqfWom2CLxO79qAvQKkjn5j1PjFslU5/+6gScaYuFJ92tkZ1N4z0hXbF" crossorigin="anonymous" />
-  <!-- Google Fonts: preconnect for early DNS/TCP/TLS — improves font load performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Merriweather", serif;
+      }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      font-family: 'Merriweather', serif;
-    }
+      /* Custom scrollbar for the notation area if needed */
+      /* WebKit-only: Chrome/Safari/Edge only — Firefox uses native scrollbars */
+      .music-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
 
-    /* Custom scrollbar for the notation area if needed */
-    /* WebKit-only: Chrome/Safari/Edge only — Firefox uses native scrollbars */
-    .music-container::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
+      .music-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
 
-    .music-container::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
+      .music-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
 
-    .music-container::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
+      .music-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
 
-    .music-container::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
+      /* ABCJS SVG styling overrides for crispness - limited to notation area */
+      .music-container svg {
+        width: 100% !important;
+      }
 
-    /* ABCJS SVG styling overrides for crispness - limited to notation area */
-    .music-container svg {
-      width: 100% !important;
-    }
-
-    /* --- ABCJS Audio Player Customization ---
+      /* --- ABCJS Audio Player Customization ---
        Rules are scoped under .abcjs-inline-audio to win specificity over
        the ABCJS default stylesheet without relying on !important.
        Only the play/pause toggle and warning-banner rules keep !important
        because they must override inline display values set by the library. */
-    .abcjs-inline-audio {
-      background-color: transparent;
-      border: none;
-      max-width: 100%;
-      margin: 0 auto;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+      .abcjs-inline-audio {
+        background-color: transparent;
+        border: none;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
 
-    .abcjs-inline-audio .abcjs-btn {
-      width: 36px;
-      height: 36px;
-      padding: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      margin: 0;
-      background: var(--bg-surface);
-      box-shadow: var(--shadow-soft);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+      .abcjs-inline-audio .abcjs-btn {
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        margin: 0;
+        background: var(--bg-surface);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
 
-    .abcjs-inline-audio .abcjs-btn:focus {
-      outline: none;
-      /* Hide focus for mouse users */
-    }
+      .abcjs-inline-audio .abcjs-btn:focus {
+        outline: none;
+        /* Hide focus for mouse users */
+      }
 
-    .abcjs-inline-audio .abcjs-btn:focus-visible {
-      outline: 2px solid #B45309;
-      /* amber-700 */
-      outline-offset: 2px;
-    }
+      .abcjs-inline-audio .abcjs-btn:focus-visible {
+        outline: 2px solid #b45309;
+        /* amber-700 */
+        outline-offset: 2px;
+      }
 
-    .abcjs-inline-audio .abcjs-btn:hover {
-      background: #FDFBF7;
-      border-color: #E8DEC1;
-      z-index: 10;
-      transform: translateY(-1px);
-    }
+      .abcjs-inline-audio .abcjs-btn:hover {
+        background: #fdfbf7;
+        border-color: #e8dec1;
+        z-index: 10;
+        transform: translateY(-1px);
+      }
 
-    .abcjs-inline-audio .abcjs-btn svg,
-    .abcjs-inline-audio .abcjs-btn g,
-    .abcjs-inline-audio .abcjs-btn path {
-      fill: var(--text-muted) !important;
-      stroke: var(--text-muted) !important;
-      width: 100%;
-      height: 100%;
-    }
+      .abcjs-inline-audio .abcjs-btn svg,
+      .abcjs-inline-audio .abcjs-btn g,
+      .abcjs-inline-audio .abcjs-btn path {
+        fill: var(--text-muted) !important;
+        stroke: var(--text-muted) !important;
+        width: 100%;
+        height: 100%;
+      }
 
-    .abcjs-inline-audio .abcjs-btn:hover svg,
-    .abcjs-inline-audio .abcjs-btn:hover g,
-    .abcjs-inline-audio .abcjs-btn:hover path {
-      fill: #B45309 !important;
-      stroke: #B45309 !important;
-      /* amber-700 */
-    }
+      .abcjs-inline-audio .abcjs-btn:hover svg,
+      .abcjs-inline-audio .abcjs-btn:hover g,
+      .abcjs-inline-audio .abcjs-btn:hover path {
+        fill: #b45309 !important;
+        stroke: #b45309 !important;
+        /* amber-700 */
+      }
 
-    /* Fix for double icons (Play/Pause showing together) — needs !important
+      /* Fix for double icons (Play/Pause showing together) — needs !important
        because ABCJS sets display via JS inline styles */
-    .abcjs-inline-audio .abcjs-midi-start .abcjs-pause-svg {
-      display: none !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-start .abcjs-pause-svg {
+        display: none !important;
+      }
 
-    .abcjs-inline-audio .abcjs-midi-start.abcjs-pushed .abcjs-play-svg {
-      display: none !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-start.abcjs-pushed .abcjs-play-svg {
+        display: none !important;
+      }
 
-    .abcjs-inline-audio .abcjs-midi-start.abcjs-pushed .abcjs-pause-svg {
-      display: block !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-start.abcjs-pushed .abcjs-pause-svg {
+        display: block !important;
+      }
 
-    /* Active/Pushed State */
-    .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed {
-      background-color: #B45309;
-      /* amber-700 */
-      border-color: #92400E;
-      /* amber-800 */
-      box-shadow: var(--shadow-inset);
-      transform: translateY(1px);
-    }
+      /* Active/Pushed State */
+      .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed {
+        background-color: #b45309;
+        /* amber-700 */
+        border-color: #92400e;
+        /* amber-800 */
+        box-shadow: var(--shadow-inset);
+        transform: translateY(1px);
+      }
 
-    .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed svg,
-    .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed g,
-    .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed path {
-      fill: #ffffff !important;
-      stroke: #ffffff !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed svg,
+      .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed g,
+      .abcjs-inline-audio .abcjs-midi-selection.abcjs-pushed path {
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+      }
 
-    .abcjs-inline-audio .abcjs-midi-progress-background {
-      background-color: #F5F5F0;
-      /* warm stone-100-ish */
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      height: 8px;
-      border-radius: 4px;
-      top: 14px;
-      /* adjust vertical alignment */
-      margin: 0 8px;
-      box-shadow: inset 0 1px 2px rgba(180, 170, 150, 0.2);
-    }
+      .abcjs-inline-audio .abcjs-midi-progress-background {
+        background-color: #f5f5f0;
+        /* warm stone-100-ish */
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 8px;
+        border-radius: 4px;
+        top: 14px;
+        /* adjust vertical alignment */
+        margin: 0 8px;
+        box-shadow: inset 0 1px 2px rgba(180, 170, 150, 0.2);
+      }
 
-    .abcjs-inline-audio .abcjs-midi-progress-indicator {
-      background-color: #B45309 !important;
-      /* amber-700 */
-      height: 12px !important;
-      width: 12px !important;
-      margin-left: -6px !important;
-      border-radius: 50% !important;
-      top: -3px !important;
-      box-shadow: 0 1px 3px rgba(180, 83, 9, 0.3) !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-progress-indicator {
+        background-color: #b45309 !important;
+        /* amber-700 */
+        height: 12px !important;
+        width: 12px !important;
+        margin-left: -6px !important;
+        border-radius: 50% !important;
+        top: -3px !important;
+        box-shadow: 0 1px 3px rgba(180, 83, 9, 0.3) !important;
+      }
 
-    .abcjs-inline-audio .abcjs-midi-clock {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
-      /* stone-500 */
-      margin-left: 12px;
-      background: #f9fafb;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
+      .abcjs-inline-audio .abcjs-midi-clock {
+        font-family: "Inter", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #6b7280;
+        /* stone-500 */
+        margin-left: 12px;
+        background: #f9fafb;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
 
-    .abcjs-inline-audio .abcjs-tempo-wrapper {
-      color: #9ca3af !important;
-      /* muted */
-    }
+      .abcjs-inline-audio .abcjs-tempo-wrapper {
+        color: #9ca3af !important;
+        /* muted */
+      }
 
-    .abcjs-inline-audio .abcjs-midi-tempo {
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      color: #6b7280 !important;
-    }
+      .abcjs-inline-audio .abcjs-midi-tempo {
+        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        color: #6b7280 !important;
+      }
 
-    /* Hide the ABCJS CSS warning banner */
-    .abcjs-css-warning {
-      display: none !important;
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
-  <link rel="stylesheet" href="/index.css">
-</head>
+      /* Hide the ABCJS CSS warning banner */
+      .abcjs-css-warning {
+        display: none !important;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "react/": "https://aistudiocdn.com/react@19.2.0/",
+          "react": "https://aistudiocdn.com/react@19.2.0",
+          "@google/genai": "https://aistudiocdn.com/@google/genai@1.30.0",
+          "react-dom/": "https://aistudiocdn.com/react-dom@19.2.0/"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/index.css" />
+  </head>
 
-<body class="antialiased">
-  <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
-
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

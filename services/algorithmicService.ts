@@ -23,8 +23,8 @@ const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (m
 const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const getInternalProfile = (level: DifficultyLevel): InternalDifficultyProfile => {
-  if (level == 1) return INTERNAL_PROFILES[1];
-  if (level == 2) return INTERNAL_PROFILES[2];
+  if (level === 1) return INTERNAL_PROFILES[1];
+  if (level === 2) return INTERNAL_PROFILES[2];
   if (level <= 4) return INTERNAL_PROFILES[3];
   if (level <= 7) return INTERNAL_PROFILES[5];
   return INTERNAL_PROFILES[8];
@@ -653,7 +653,7 @@ export const generateAlgorithmicSheetMusic = (
     difficulty,
     key: keyName,
     timeSignature,
-    description: `${effectiveCoordination} Motion - Level ${settings.rhythmComplexity} Rhythm`,
+    description: `${effectiveCoordination.charAt(0) + effectiveCoordination.slice(1).toLowerCase()} Motion - Level ${settings.rhythmComplexity} Rhythm`,
     abcNotation: AbcEngraver.render(score)
   };
 };

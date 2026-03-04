@@ -1,137 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Virtuoso Sight-Reading</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ABCJS for rendering music notation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
-    <!-- ABCJS Audio CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
-      h1, h2, h3 {
-        font-family: 'Cinzel', serif;
-      }
-      /* Custom scrollbar for the notation area if needed */
-      .music-container::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      .music-container::-webkit-scrollbar-track {
-        background: #f1f1f1; 
-      }
-      .music-container::-webkit-scrollbar-thumb {
-        background: #888; 
-        border-radius: 4px;
-      }
-      .music-container::-webkit-scrollbar-thumb:hover {
-        background: #555; 
-      }
-      
-      /* ABCJS SVG styling overrides for crispness */
-      svg {
-        width: 100% !important;
-      }
 
-      /* --- ABCJS Audio Player Customization --- */
-      .abcjs-inline-audio {
-        background-color: transparent !important;
-        border: none !important;
-        max-width: 100% !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-      }
-      
-      .abcjs-btn {
-        width: 36px !important;
-        height: 36px !important;
-        padding: 6px !important;
-        border: 1px solid #e5e7eb !important; /* stone-200 */
-        border-radius: 8px !important;
-        margin: 0 !important;
-        background: #ffffff !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-      }
-      
-      .abcjs-btn:hover {
-        background: #eff6ff !important; /* indigo-50 */
-        border-color: #6366f1 !important; /* indigo-500 */
-        z-index: 10;
-      }
-      
-      .abcjs-btn svg {
-        fill: #4b5563 !important; /* stone-600 */
-        width: 100% !important;
-        height: 100% !important;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtuoso Sight-Reading</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ABCJS for rendering music notation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
+  <!-- ABCJS Audio CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css" />
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
 
-      .abcjs-btn:hover svg {
-        fill: #4f46e5 !important; /* indigo-600 */
-      }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Merriweather', serif;
+    }
 
-      /* Fix for double icons (Play/Pause showing together) */
-      .abcjs-midi-start .abcjs-pause-svg {
-        display: none !important;
-      }
-      .abcjs-midi-start.abcjs-pushed .abcjs-play-svg {
-        display: none !important;
-      }
-      .abcjs-midi-start.abcjs-pushed .abcjs-pause-svg {
-        display: block !important;
-      }
+    /* Custom scrollbar for the notation area if needed */
+    .music-container::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
 
-      /* Active/Pushed State */
-      .abcjs-midi-selection.abcjs-pushed {
-        background-color: #4f46e5 !important;
-        border-color: #4338ca !important;
-      }
-      .abcjs-midi-selection.abcjs-pushed svg {
-        fill: #ffffff !important;
-      }
-      
-      .abcjs-midi-progress-background {
-        background-color: #e5e7eb !important; /* stone-200 */
-        border: none !important;
-        height: 6px !important;
-        border-radius: 3px !important;
-        top: 15px !important; /* adjust vertical alignment */
-        margin: 0 8px !important;
-      }
-      
-      .abcjs-midi-progress-bar {
-        background-color: #4f46e5 !important; /* indigo-600 */
-        height: 6px !important;
-        border-radius: 3px !important;
-        box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2) !important;
-      }
-      
-      .abcjs-midi-clock {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        color: #6b7280 !important; /* stone-500 */
-        margin-left: 12px !important;
-        background: #f9fafb;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-      
-      .abcjs-midi-tempo {
-         font-family: 'Inter', sans-serif !important;
-         font-size: 12px !important;
-         color: #6b7280 !important;
-      }
+    .music-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
 
-    </style>
+    .music-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    .music-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* ABCJS SVG styling overrides for crispness */
+    svg {
+      width: 100% !important;
+    }
+
+    /* --- ABCJS Audio Player Customization --- */
+    .abcjs-inline-audio {
+      background-color: transparent !important;
+      border: none !important;
+      max-width: 100% !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+    }
+
+    .abcjs-btn {
+      width: 36px !important;
+      height: 36px !important;
+      padding: 6px !important;
+      border: 1px solid rgba(0, 0, 0, 0.05) !important;
+      border-radius: 8px !important;
+      margin: 0 !important;
+      background: var(--bg-surface) !important;
+      box-shadow: var(--shadow-soft) !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .abcjs-btn:hover {
+      background: #FDFBF7 !important;
+      border-color: #E8DEC1 !important;
+      z-index: 10;
+      transform: translateY(-1px);
+    }
+
+    .abcjs-btn svg {
+      fill: var(--text-muted) !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .abcjs-btn:hover svg {
+      fill: #B45309 !important;
+      /* amber-700 */
+    }
+
+    /* Fix for double icons (Play/Pause showing together) */
+    .abcjs-midi-start .abcjs-pause-svg {
+      display: none !important;
+    }
+
+    .abcjs-midi-start.abcjs-pushed .abcjs-play-svg {
+      display: none !important;
+    }
+
+    .abcjs-midi-start.abcjs-pushed .abcjs-pause-svg {
+      display: block !important;
+    }
+
+    /* Active/Pushed State */
+    .abcjs-midi-selection.abcjs-pushed {
+      background-color: #B45309 !important;
+      /* amber-700 */
+      border-color: #92400E !important;
+      /* amber-800 */
+      box-shadow: var(--shadow-inset) !important;
+      transform: translateY(1px);
+    }
+
+    .abcjs-midi-selection.abcjs-pushed svg {
+      fill: #ffffff !important;
+    }
+
+    .abcjs-midi-progress-background {
+      background-color: #F5F5F0 !important;
+      /* warm stone-100-ish */
+      border: 1px solid rgba(0, 0, 0, 0.05) !important;
+      height: 8px !important;
+      border-radius: 4px !important;
+      top: 14px !important;
+      /* adjust vertical alignment */
+      margin: 0 8px !important;
+      box-shadow: inset 0 1px 2px rgba(180, 170, 150, 0.2) !important;
+    }
+
+    .abcjs-midi-progress-bar {
+      background-color: #B45309 !important;
+      /* amber-700 */
+      height: 8px !important;
+      border-radius: 4px !important;
+      box-shadow: 0 1px 3px rgba(180, 83, 9, 0.3) !important;
+    }
+
+    .abcjs-midi-clock {
+      font-family: 'Inter', sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #6b7280 !important;
+      /* stone-500 */
+      margin-left: 12px !important;
+      background: #f9fafb;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .abcjs-midi-tempo {
+      font-family: 'Inter', sans-serif !important;
+      font-size: 12px !important;
+      color: #6b7280 !important;
+    }
+
+    /* Hide the ABCJS CSS warning banner */
+    .abcjs-css-warning {
+      display: none !important;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -142,10 +174,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-slate-50 text-slate-900 antialiased">
-    <div id="root"></div>
+
+<body class="antialiased">
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

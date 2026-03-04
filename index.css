@@ -1,0 +1,69 @@
+:root {
+  /* Color Palette - Tactile & Acoustic (Warm Paper Theme) */
+  --bg-primary: #FDFBF7;
+  /* Warmer, lighter Ivory/Paper core */
+  --bg-surface: #FFFFFF;
+  /* Crisp white for physical elements like keys */
+
+  --text-main: #3E3B35;
+  /* Warm deep dark brown/charcoal */
+  --text-muted: #9E998F;
+  /* Warm stone-like muted text */
+
+  --accent-gold: #D4AF37;
+  /* Muted Gold for streaks/progress */
+  --accent-green: #5A8C5B;
+  /* Warmer Muted Green for correct answers */
+  --accent-red: #D66E6E;
+  /* Warmer Soft Red for incorrect answers */
+
+  /* Soft UI / Neumorphism Shadows (Warmer tints) */
+  /* Used for elevated cards or unpressed buttons/keys */
+  --shadow-soft: 4px 4px 12px rgba(180, 170, 150, 0.15), -4px -4px 12px rgba(255, 255, 255, 0.9);
+  /* Used for pressed states (e.g. active piano keys) */
+  --shadow-inset: inset 2px 2px 6px rgba(180, 170, 150, 0.2), inset -2px -2px 6px rgba(255, 255, 255, 0.9);
+
+  /* Transitions */
+  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  /* Apply Inter as the default sans-serif font */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Utility Classes */
+.font-heading {
+  font-family: 'Merriweather', 'Playfair Display', serif;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Soft UI Utility Classes */
+.soft-surface {
+  background-color: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-smooth);
+}
+
+/* For elements that should look like they pop out a bit more, like piano keys */
+.soft-element {
+  background-color: var(--bg-surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-smooth);
+}
+
+.soft-element:active,
+.soft-pressed {
+  box-shadow: var(--shadow-inset);
+  transform: translateY(1px);
+  /* slight physical push down */
+}

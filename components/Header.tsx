@@ -5,7 +5,7 @@ export const Header: React.FC = () => {
     <header className="bg-white/80 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
         <div className="flex items-center gap-4">
-          <div className="bg-white soft-element text-amber-700 p-2.5 rounded-xl shadow-[2px_2px_5px_rgba(215,200,180,0.5)] border border-[#E8DEC1]">
+          <div className="bg-white soft-element text-amber-700 p-2.5 rounded-xl" style={{ boxShadow: 'var(--shadow-soft)', border: '1px solid #E8DEC1' }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-2.53-1.215V9.75M9 17.25v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-2.53-1.215V4.5h12.75" />
             </svg>

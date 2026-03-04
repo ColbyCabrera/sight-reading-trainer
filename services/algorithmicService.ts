@@ -397,7 +397,8 @@ class AbcEngraver {
             }
 
             let durStr = "";
-            if (token.duration === 0.5) durStr = "/2";
+            if (Math.abs(token.duration - 0.75) < 1e-6) durStr = "3/4";
+            else if (token.duration === 0.5) durStr = "/2";
             else if (token.duration === 0.25) durStr = "/4";
             else if (token.duration === 1.5) durStr = "3/2";
             else if (token.duration === 2) durStr = "2";

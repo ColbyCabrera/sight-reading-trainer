@@ -34,19 +34,18 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-main);
-  /* Apply Inter as the default sans-serif font */
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Typography Utility Classes */
 .font-heading {
-  font-family: 'Merriweather', 'Playfair Display', serif;
+  font-family: Merriweather, "Playfair Display", serif;
 }
 
 .font-body {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 /* Soft UI Utility Classes */

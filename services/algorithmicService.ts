@@ -412,11 +412,11 @@ class AbcEngraver {
           if (currentBeat % 1 === 0) partString += " ";
         });
 
-        partString += "| ";
+        partString += mIdx === part.measures.length - 1 ? "|]" : "| ";
         if ((mIdx + 1) % 4 === 0 && mIdx !== part.measures.length - 1) partString += "\n";
       });
 
-      abc += partString + "]\n";
+      abc += partString + "\n";
     });
 
     return abc;

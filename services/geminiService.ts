@@ -98,7 +98,7 @@ export const generateSheetMusic = async (difficulty: DifficultyLevel, key: Music
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         systemInstruction: getSystemInstruction(),

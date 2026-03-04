@@ -45,7 +45,7 @@ export const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'
 export const SCALES = {
   MAJOR: [0, 2, 4, 5, 7, 9, 11],
   MINOR_NATURAL: [0, 2, 3, 5, 7, 8, 10],
-  MINOR_HARMONIC: [0, 2, 3, 5, 7, 8, 11], 
+  MINOR_HARMONIC: [0, 2, 3, 5, 7, 8, 11],
 };
 
 // Chord Progressions (0-indexed degrees)
@@ -60,33 +60,61 @@ export const PROGRESSIONS = {
 };
 
 // Rhythmic Templates (Duration in beats)
-export const RHYTHM_PATTERNS = {
+// Organized by Time Signature -> Level (1-10) -> { common: [], rare: [] }
+export const RHYTHM_PATTERNS: Record<string, Record<number, { common: number[][], rare: number[][] }>> = {
   '4/4': {
-    SIMPLE: [
-      [1, 1, 1, 1],         
-      [2, 1, 1],            
-      [1, 1, 2],            
-      [4],                  
-      [2, 2]
-    ],
-    INTERMEDIATE: [
-      [1.5, 0.5, 1, 1],     
-      [1, 0.5, 0.5, 2],     
-      [0.5, 0.5, 0.5, 0.5, 1, 1], 
-      [1, 1, 1.5, 0.5],     
-    ],
-    COMPLEX: [
-      [0.75, 0.25, 1, 1, 1], 
-      [0.5, 1, 0.5, 1, 1],   
-      [1, 0.5, 1, 0.5, 1],   
-      [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], 
-      [1.5, 1.5, 1],         
-    ]
+    1: { // Whole notes, Half notes
+      common: [[4], [2, 2]],
+      rare: [[2, 1, 1], [1, 1, 2]]
+    },
+    2: { // Quarter notes introduced
+      common: [[1, 1, 1, 1], [1, 1, 2]],
+      rare: [[2, 1, 1], [2, 2], [4]]
+    },
+    3: { // Add dotted half notes and dotted quarter notes
+      common: [[3, 1], [1, 1, 1, 1], [2, 1, 1]],
+      rare: [[1.5, 0.5, 2], [1, 1, 2], [1, 3], [1, 1.5, 0.5, 1]]
+    },
+    4: { // Eighth notes (pairs)
+      common: [[1, 1, 1, 1], [2, 1, 1]],
+      rare: [[1, 1, 0.5, 0.5, 1], [0.5, 0.5, 1, 2], [2, 1.5, 0.5]]
+    },
+    5: { // Dotted quarter + eighth
+      common: [[1.5, 0.5, 2], [2, 1.5, 0.5]],
+      rare: [[1.5, 0.5, 1, 1], [1, 1, 1.5, 0.5]]
+    },
+    6: { // Syncopation basics
+      common: [[0.5, 1, 0.5, 2], [1, 1.5, 0.5, 1]],
+      rare: [[0.5, 1, 1, 1, 0.5], [1.5, 1.5, 1]]
+    },
+    7: { // More eighths
+      common: [[0.5, 0.5, 0.5, 0.5, 1, 1], [1, 0.5, 0.5, 0.5, 0.5, 1]],
+      rare: [[0.5, 0.5, 1, 0.5, 0.5, 1], [0.75, 0.25, 1, 2]]
+    },
+    8: { // Sixteenths introduced (simple)
+      common: [[1, 1, 0.25, 0.25, 0.25, 0.25, 1], [0.25, 0.25, 0.25, 0.25, 1, 2]],
+      rare: [[0.75, 0.25, 1, 1, 1], [1, 0.75, 0.25, 2]]
+    },
+    9: { // Complex syncopation & 16ths
+      common: [[0.75, 0.25, 0.5, 0.5, 1, 1], [0.5, 1, 0.5, 0.25, 0.25, 0.25, 0.25, 0.5, 0.5]],
+      rare: [[0.25, 0.5, 0.25, 1, 1, 1], [1.5, 0.25, 0.25, 2]]
+    },
+    10: { // Very complex
+      common: [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 1, 1], [0.75, 0.25, 0.75, 0.25, 0.75, 0.25, 1]],
+      rare: [[0.25, 0.75, 0.25, 0.75, 1, 1], [0.5, 0.25, 0.25, 0.5, 0.25, 0.25, 1, 1]]
+    }
   },
   '3/4': {
-    SIMPLE: [[1, 1, 1], [2, 1], [1, 2], [3]],
-    INTERMEDIATE: [[1.5, 0.5, 1], [1, 0.5, 0.5, 1], [0.5, 0.5, 1, 1]],
-    COMPLEX: [[0.5, 0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 0.5, 0.5, 0.5], [0.5, 1, 0.5, 1]]
+    1: { common: [[3], [2, 1]], rare: [[1, 2], [1, 1, 1]] },
+    2: { common: [[1, 1, 1], [2, 1]], rare: [[1, 2], [1, 1, 1]] },
+    3: { common: [[1.5, 0.5, 1], [1, 1.5, 0.5]], rare: [[0.5, 0.5, 1, 1]] },
+    4: { common: [[1, 0.5, 0.5, 1], [0.5, 0.5, 1, 1]], rare: [[1.5, 0.5, 1]] },
+    5: { common: [[1.5, 0.5, 1], [0.5, 1, 0.5, 1]], rare: [[1, 0.5, 0.5, 0.5, 0.5]] },
+    6: { common: [[0.5, 0.5, 0.5, 0.5, 1], [1.5, 1.5]], rare: [[0.5, 1, 1.5]] },
+    7: { common: [[0.75, 0.25, 1, 1], [1, 0.75, 0.25, 1]], rare: [[0.25, 0.25, 0.25, 0.25, 1, 1]] },
+    8: { common: [[0.25, 0.25, 0.25, 0.25, 1, 1], [0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 1]], rare: [[0.75, 0.25, 0.75, 0.25, 1]] },
+    9: { common: [[0.25, 0.5, 0.25, 1, 1], [1, 0.25, 0.5, 0.25, 1]], rare: [[0.5, 0.25, 0.25, 0.5, 0.25, 0.25, 1]] },
+    10: { common: [[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 1], [0.75, 0.25, 0.75, 0.25, 0.75, 0.25]], rare: [[0.25, 0.75, 0.25, 0.75, 1]] }
   }
 };
 
@@ -109,26 +137,40 @@ export interface InternalDifficultyProfile {
 
 // Base internal configs that don't change with user sliders
 export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
-  1: { // Level 1-2
-    rangeLH: [48, 60], rangeRH: [60, 72],
-    maxLeapProb: 0.0, syncopationProb: 0,
+  1: { // Level 1
+    rangeLH: [43, 60], rangeRH: [59, 79],
+    maxLeapProb: 0.1, syncopationProb: 0,
     accidentalsAllowed: false,
     chordComplexity: 'SHELL',
-    costs: { leapPenalty: 50, dissonancePenalty: 100, directionChangeBonus: 0, repetitionPenalty: 5 }
+    costs: { leapPenalty: 30, dissonancePenalty: 100, directionChangeBonus: 5, repetitionPenalty: 16 }
   },
-  3: { // Level 3-4
-    rangeLH: [41, 62], rangeRH: [60, 77], // Lowered LH max to 62, RH min kept at 57
+  2: { // Level 2
+    rangeLH: [48, 60], rangeRH: [60, 76],
+    maxLeapProb: 0.3, syncopationProb: 0,
+    accidentalsAllowed: false,
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 20, dissonancePenalty: 100, directionChangeBonus: 10, repetitionPenalty: 15 }
+  },
+  3: { // Level 3
+    rangeLH: [41, 62], rangeRH: [60, 77],
+    maxLeapProb: 0.5, syncopationProb: 0.05,
+    accidentalsAllowed: true,
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 5, dissonancePenalty: 60, directionChangeBonus: 30, repetitionPenalty: 25 }
+  },
+  4: { // Level 4 uses reduced complexity so hands together transition is easier
+    rangeLH: [41, 62], rangeRH: [60, 77],
     maxLeapProb: 0.2, syncopationProb: 0.05,
     accidentalsAllowed: true,
-    chordComplexity: 'TRIAD',
-    costs: { leapPenalty: 20, dissonancePenalty: 60, directionChangeBonus: 20, repetitionPenalty: 10 }
+    chordComplexity: 'SHELL',
+    costs: { leapPenalty: 15, dissonancePenalty: 60, directionChangeBonus: 10, repetitionPenalty: 15 }
   },
-  5: { // Level 5-7
-    rangeLH: [36, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
+  5: { // Level 5 - More variation, less constraints
+    rangeLH: [40, 64], rangeRH: [60, 81], // RH min set to 60 (Middle C) to avoid crossing bass
     maxLeapProb: 0.5, syncopationProb: 0.3,
     accidentalsAllowed: true,
     chordComplexity: 'FULL',
-    costs: { leapPenalty: 10, dissonancePenalty: 40, directionChangeBonus: 40, repetitionPenalty: 20 }
+    costs: { leapPenalty: 20, dissonancePenalty: 40, directionChangeBonus: 40, repetitionPenalty: 20 }
   },
   8: { // Level 8-10
     rangeLH: [36, 67], rangeRH: [55, 88], // RH min set to 60
@@ -144,63 +186,80 @@ export const getSettingsForLevel = (level: DifficultyLevel): GenerationSettings 
   // Level 1: Hands Separate (Alternating), Simple Rhythm, 5-finger
   if (level === 1) return {
     maxInterval: 2,
-    rhythmComplexity: 'SIMPLE',
+    rhythmComplexity: 1,
+    rhythmVariance: 0.8,
     handCoordination: 'SEPARATE',
-    accompanimentStyle: 'NONE',
+    accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
   };
-  
-  // Level 2: Parallel Motion (Hands locked), Simple Rhythm
+
+  // Level 2: Add Parallel Motion (Hands locked), Simple Rhythm
   if (level === 2) return {
     maxInterval: 3,
-    rhythmComplexity: 'SIMPLE',
-    handCoordination: 'PARALLEL',
-    accompanimentStyle: 'NONE',
+    rhythmComplexity: 2,
+    rhythmVariance: 0.3,
+    handCoordination: 'RANDOM',
+    accompanimentStyle: ['NONE'],
     playability: '5-FINGER'
   };
 
-  // Level 3: First Hands Together (Independent), Simple Block Chords
+  // Level 3: add more complexity
   if (level === 3) return {
+    maxInterval: 6,
+    rhythmComplexity: 3,
+    rhythmVariance: 0.6,
+    handCoordination: 'RANDOM',
+    accompanimentStyle: ['NONE'],
+    playability: 'OCTAVE'
+  };
+
+  // Level 4: First Hands Together (Independent), Simple Block Chords
+  if (level === 4) return {
     maxInterval: 4,
-    rhythmComplexity: 'SIMPLE',
+    rhythmComplexity: 2,
+    rhythmVariance: 0.3,
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'BLOCK',
+    accompanimentStyle: ['BLOCK', 'BROKEN'],
     playability: '5-FINGER'
   };
 
-  // Level 4: Hands Together, Faster Rhythms (Eighth notes)
-  if (level === 4) return {
-    maxInterval: 5,
-    rhythmComplexity: 'INTERMEDIATE',
-    handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'BROKEN', // Simple broken chords
-    playability: 'OCTAVE'
-  };
-
-  // Level 5: More variation
+  // Level 5: More variation and complexity
   if (level === 5) return {
-    maxInterval: 6,
-    rhythmComplexity: 'INTERMEDIATE',
+    maxInterval: 5,
+    rhythmComplexity: 3,
+    rhythmVariance: 0.4,
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'WALTZ',
+    accompanimentStyle: ['MIXED', 'BLOCK', 'ALBERTI'],
     playability: 'OCTAVE'
   };
 
-  // Level 6-7
+  // Level 6: More variation
+  if (level === 6) return {
+    maxInterval: 6,
+    rhythmComplexity: 5,
+    rhythmVariance: 0.5,
+    handCoordination: 'INDEPENDENT',
+    accompanimentStyle: ['WALTZ'],
+    playability: 'OCTAVE'
+  };
+
+  // Level 7
   if (level <= 7) return {
     maxInterval: 8,
-    rhythmComplexity: 'COMPLEX',
+    rhythmComplexity: level as DifficultyLevel,
+    rhythmVariance: 0.6,
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'ALBERTI',
+    accompanimentStyle: ['ALBERTI'],
     playability: 'OCTAVE'
   };
 
   // Level 8+
   return {
     maxInterval: 12,
-    rhythmComplexity: 'COMPLEX',
+    rhythmComplexity: level as DifficultyLevel,
+    rhythmVariance: 0.7,
     handCoordination: 'INDEPENDENT',
-    accompanimentStyle: 'STRIDE',
+    accompanimentStyle: ['STRIDE'],
     playability: 'LARGE'
   };
 };
@@ -213,7 +272,7 @@ export const KEY_MAP: Record<string, { root: number, type: 'MAJOR' | 'MINOR', fl
   'F Major': { root: 65, type: 'MAJOR', flats: 1 },
   'Bb Major': { root: 70, type: 'MAJOR', flats: 2 },
   'Eb Major': { root: 63, type: 'MAJOR', flats: 3 },
-  
+
   'A Minor': { root: 57, type: 'MINOR', sharps: 0 },
   'E Minor': { root: 64, type: 'MINOR', sharps: 1 },
   'B Minor': { root: 71, type: 'MINOR', sharps: 2 },

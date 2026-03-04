@@ -52,11 +52,10 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Initial generation
+  // Initial generation on mount only; getSettingsForLevel is a stable module fn (no dep needed)
   useEffect(() => {
     handleGenerate(1, 'Random', 'Algorithm', getSettingsForLevel(1));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleGenerate]);
 
   const handleDifficultyChange = (newLevel: DifficultyLevel) => {
     setDifficulty(newLevel);

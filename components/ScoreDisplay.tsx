@@ -50,7 +50,7 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
           createSynth.init({ visualObj: visualObj[0] }).then(() => {
             // chordsOff: true prevents ABCJS from playing chord symbols (C, G7) automatically
             // if they existed in the text, but we generate notes explicitly so this is safe.
-            synthControl.setTune(visualObj[0], false, {
+            return synthControl.setTune(visualObj[0], false, {
               chordsOff: true,
               midiVol: 100 // Ensure dynamics are audible
             }).then(() => {

@@ -44,7 +44,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const isLoading = loadingState === 'generating';
 
   // Handler to update a single setting
-  const updateSetting = (key: keyof GenerationSettings, value: any) => {
+  const updateSetting = <K extends keyof GenerationSettings>(key: K, value: GenerationSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
   };
 
@@ -143,7 +143,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <input
                   type="range" min="1" max="10" step="1"
                   value={settings.rhythmComplexity}
-                  onChange={(e) => updateSetting('rhythmComplexity', Number(e.target.value))}
+                  onChange={(e) => updateSetting('rhythmComplexity', Number(e.target.value) as DifficultyLevel)}
                   className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
                 />
               </div>
@@ -180,31 +180,33 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div>
                 <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">Accompaniment Pools</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {['BLOCK', 'BROKEN', 'ALBERTI', 'WALTZ', 'STRIDE'].map((style) => (
-                    <label key={style} className={`flex items-center gap-2 text-[13px] font-medium p-2 rounded-md border transition-colors cursor-pointer
+                  {(['BLOCK', 'BROKEN', 'ALBERTI', 'WALTZ', 'STRIDE'] as const).map((style) => {
+                    const currentStyles = settings.accompanimentStyle;
+                    return (
+                      <label key={style} className={`flex items-center gap-2 text-[13px] font-medium p-2 rounded-md border transition-colors cursor-pointer
                       ${settings.handCoordination !== 'INDEPENDENT' ? 'opacity-50 cursor-not-allowed bg-stone-50/50' : 'hover:bg-[#FDFBF7]'}
-                      ${(settings.accompanimentStyle as string[]).includes(style) ? 'border-amber-200 bg-amber-50/50 text-amber-800' : 'border-[#E8DEC1] text-stone-600'}
+                      ${currentStyles.includes(style) ? 'border-amber-200 bg-amber-50/50 text-amber-800' : 'border-[#E8DEC1] text-stone-600'}
                     `}>
-                      <input
-                        type="checkbox"
-                        checked={(settings.accompanimentStyle as string[]).includes(style)}
-                        onChange={(e) => {
-                          const currentStyles = settings.accompanimentStyle as string[];
-                          let newStyles;
-                          if (e.target.checked) {
-                            newStyles = [...currentStyles, style];
-                          } else {
-                            newStyles = currentStyles.filter(s => s !== style);
-                          }
-                          if (newStyles.length === 0) newStyles = ['BLOCK'];
-                          updateSetting('accompanimentStyle', newStyles);
-                        }}
-                        disabled={settings.handCoordination !== 'INDEPENDENT'}
-                        className="rounded border-[#E8DEC1] text-amber-600 focus:ring-amber-500 w-4 h-4"
-                      />
-                      {style.charAt(0) + style.slice(1).toLowerCase()}
-                    </label>
-                  ))}
+                        <input
+                          type="checkbox"
+                          checked={currentStyles.includes(style)}
+                          onChange={(e) => {
+                            let newStyles: typeof currentStyles;
+                            if (e.target.checked) {
+                              newStyles = [...currentStyles, style];
+                            } else {
+                              newStyles = currentStyles.filter(s => s !== style);
+                            }
+                            if (newStyles.length === 0) newStyles = ['BLOCK'];
+                            updateSetting('accompanimentStyle', newStyles);
+                          }}
+                          disabled={settings.handCoordination !== 'INDEPENDENT'}
+                          className="rounded border-[#E8DEC1] text-amber-600 focus:ring-amber-500 w-4 h-4"
+                        />
+                        {style.charAt(0) + style.slice(1).toLowerCase()}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 

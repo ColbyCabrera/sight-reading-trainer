@@ -1,0 +1,2 @@
+https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js sha384-5nqtJ2Sc/D/Haeh8FXSBRRMme+jBO3p3Bk3yYsRQLrYEO7XIJwx/mDt+BEVN9Hda
+https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css sha384-ZSs6LKr2GoUPDyHrN+rCQgyHL1yUyok5xMniSrgeRG7rUvA6vTmxronM1eZOfjgz

@@ -5,11 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtuoso Sight-Reading</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <!-- ABCJS for rendering music notation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"
+    integrity="sha384-5nqtJ2Sc/D/Haeh8FXSBRRMme+jBO3p3Bk3yYsRQLrYEO7XIJwx/mDt+BEVN9Hda"
+    crossorigin="anonymous"></script>
   <!-- ABCJS Audio CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css"
+    integrity="sha384-ZSs6LKr2GoUPDyHrN+rCQgyHL1yUyok5xMniSrgeRG7rUvA6vTmxronM1eZOfjgz" crossorigin="anonymous" />
   <!-- Google Fonts -->
   <link
     href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@300;400;500;600&display=swap"
@@ -74,6 +76,17 @@
       background: var(--bg-surface) !important;
       box-shadow: var(--shadow-soft) !important;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .abcjs-btn:focus {
+      outline: none !important;
+      /* Hide focus for mouse users */
+    }
+
+    .abcjs-btn:focus-visible {
+      outline: 2px solid #B45309 !important;
+      /* amber-700 */
+      outline-offset: 2px !important;
     }
 
     .abcjs-btn:hover {

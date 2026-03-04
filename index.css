@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Color Palette - Tactile & Acoustic (Warm Paper Theme) */
   --bg-primary: #FDFBF7;

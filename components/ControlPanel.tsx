@@ -233,31 +233,34 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <button
         onClick={onGenerate}
         disabled={isLoading}
-        className={`w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 transform active:scale-[0.98] soft-element group relative overflow-hidden
+        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none
           ${isLoading
-            ? 'bg-stone-300 pointer-events-none text-stone-500 shadow-none'
-            : 'bg-amber-700 hover:bg-amber-800 hover:shadow-lg hover:-translate-y-0.5 shadow-amber-200/50'
+            ? 'bg-stone-200 text-stone-400 border border-stone-300'
+            : 'bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white shadow-[0_4px_14px_0_rgba(180,83,9,0.39)] hover:shadow-[0_6px_20px_rgba(180,83,9,0.23)] hover:-translate-y-[1px] active:translate-y-[1px] border border-amber-500/30'
           }
         `}
       >
-        <div className={`absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out z-0`} />
+        {/* Shine sweep on hover */}
+        {!isLoading && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out z-0" />
+        )}
 
         <div className="relative z-10">
           {isLoading ? (
-            <span className="flex items-center justify-center gap-3">
-              <svg className="animate-spin h-5 w-5 text-stone-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Composing...
-            </span>
+              <span>Composing...</span>
+            </div>
           ) : (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5 shrink-0 transition-transform group-hover:-rotate-12 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
               </svg>
-              Generate Practice Score
-            </span>
+              <span className="truncate">Generate Score</span>
+            </div>
           )}
         </div>
       </button>

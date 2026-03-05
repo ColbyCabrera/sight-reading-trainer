@@ -23,7 +23,7 @@ export interface Measure {
   isStrong: boolean;   // Is this a structurally important measure?
 }
 
-export interface Part {
+interface Part {
   name: string;
   clef: 'treble' | 'bass';
   measures: Measure[];

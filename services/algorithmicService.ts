@@ -1,9 +1,9 @@
-import {
+import type {
   SightReadingExercise,
   DifficultyLevel,
   MusicalKey,
   GenerationSettings,
-} from "../types";
+} from "../types.ts";
 import {
   INTERNAL_PROFILES,
   getSettingsForLevel,
@@ -12,11 +12,13 @@ import {
   PROGRESSIONS,
   SCALES,
   RHYTHM_PATTERNS,
+} from "../utils/musicTheory.ts";
+import type {
   ScoreStructure,
   Measure,
   NoteToken,
   InternalDifficultyProfile,
-} from "../utils/musicTheory";
+} from "../utils/musicTheory.ts";
 
 /**
  * ALGORITHMIC COMPOSITION PIPELINE
@@ -207,7 +209,10 @@ class HarmonicEngine {
 }
 
 class AccompanimentGenerator {
-  constructor(private engine: HarmonicEngine) {}
+  private engine: HarmonicEngine;
+  constructor(engine: HarmonicEngine) {
+    this.engine = engine;
+  }
 
   public generate(
     sourceMeasures: Measure[], // Now accepting source measures (always has notes)

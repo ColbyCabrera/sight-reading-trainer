@@ -1,5 +1,5 @@
 
-import { GenerationSettings, DifficultyLevel } from "../types";
+import type { GenerationSettings, DifficultyLevel } from "../types.ts";
 
 /**
  * MUSIC THEORY ENGINE & RULES

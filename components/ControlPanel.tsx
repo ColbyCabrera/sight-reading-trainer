@@ -133,7 +133,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="mb-8 border-t border-[#E8DEC1] pt-5">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-xs font-bold text-stone-500 uppercase tracking-wide hover:text-amber-700 transition-colors w-full justify-between"
+            aria-expanded={showAdvanced}
+            aria-controls="advanced-settings-panel"
+            className="flex items-center gap-2 text-xs font-bold text-stone-500 uppercase tracking-wide hover:text-amber-700 transition-colors w-full justify-between rounded-md outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <span>{showAdvanced ? "Hide" : "Show"} Custom Settings</span>
             <div className="p-1.5 bg-stone-50 rounded-md">
@@ -157,7 +159,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </button>
 
           {showAdvanced && (
-            <div className="mt-5 space-y-5 soft-surface bg-[#FDFBF7] p-5 border border-[#E8DEC1] animate-in slide-in-from-top-2 duration-200">
+            <div
+              id="advanced-settings-panel"
+              className="mt-5 space-y-5 soft-surface bg-[#FDFBF7] p-5 border border-[#E8DEC1] animate-in slide-in-from-top-2 duration-200"
+            >
               {/* Hand Coordination */}
               <div>
                 <label
@@ -362,7 +367,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <button
         onClick={onGenerate}
         disabled={isLoading}
-        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none
+        aria-busy={isLoading}
+        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
           ${
             isLoading
               ? "bg-stone-200 text-stone-400 border border-stone-300"

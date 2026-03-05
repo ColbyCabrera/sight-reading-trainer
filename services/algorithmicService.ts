@@ -161,6 +161,8 @@ class HarmonicEngine {
     let bestNote = candidates[0];
     let minCost = Infinity;
 
+    const chordTones = this.getChordTones(currentMeasureChord, 4);
+
     for (const candidate of candidates) {
       let cost = 0;
       const interval = candidate - prevPitch;
@@ -172,7 +174,6 @@ class HarmonicEngine {
 
       if (absInterval > 4) cost += this.profile.costs.leapPenalty;
 
-      const chordTones = this.getChordTones(currentMeasureChord, 4);
       const isChordTone = chordTones.some((ct) => ct % 12 === candidate % 12);
 
       if (isStrongBeat && !isChordTone) {

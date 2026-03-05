@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import {
   DifficultyLevel,
   LoadingState,
@@ -53,6 +53,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const isLoading = loadingState === "generating";
+  const advancedPanelId = useId();
 
   // Handler to update a single setting
   const updateSetting = <K extends keyof GenerationSettings>(
@@ -133,7 +134,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="mb-8 border-t border-[#E8DEC1] pt-5">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-xs font-bold text-stone-500 uppercase tracking-wide hover:text-amber-700 transition-colors w-full justify-between"
+            aria-expanded={showAdvanced}
+            aria-controls={advancedPanelId}
+            className="flex items-center gap-2 text-xs font-bold text-stone-500 uppercase tracking-wide hover:text-amber-700 transition-colors w-full justify-between rounded-md outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <span>{showAdvanced ? "Hide" : "Show"} Custom Settings</span>
             <div className="p-1.5 bg-stone-50 rounded-md">
@@ -156,139 +159,146 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           </button>
 
-          {showAdvanced && (
-            <div className="mt-5 space-y-5 soft-surface bg-[#FDFBF7] p-5 border border-[#E8DEC1] animate-in slide-in-from-top-2 duration-200">
-              {/* Hand Coordination */}
-              <div>
+          <div
+            id={advancedPanelId}
+            className={`mt-5 space-y-5 soft-surface bg-[#FDFBF7] p-5 border border-[#E8DEC1] transition-all duration-300 ${
+              showAdvanced
+                ? "opacity-100 max-h-[1000px] visible"
+                : "opacity-0 max-h-0 hidden p-0 border-0 overflow-hidden"
+            }`}
+            aria-hidden={!showAdvanced}
+          >
+            {/* Hand Coordination */}
+            <div>
+              <label
+                htmlFor="handCoordination"
+                className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2"
+              >
+                Hand Coordination
+              </label>
+              <select
+                id="handCoordination"
+                value={settings.handCoordination}
+                onChange={(e) =>
+                  updateSetting(
+                    "handCoordination",
+                    e.target.value as GenerationSettings["handCoordination"],
+                  )
+                }
+                className="w-full text-sm p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2378716c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: `right 0.5rem center`,
+                  backgroundRepeat: `no-repeat`,
+                  backgroundSize: `1.5em 1.5em`,
+                  paddingRight: `2.5rem`,
+                }}
+              >
+                <option value="SEPARATE">Hands Separate (Alternating)</option>
+                <option value="PARALLEL">Parallel Motion (Locked)</option>
+                <option value="INDEPENDENT">Independent (Together)</option>
+                <option value="RANDOM">Random Mix</option>
+              </select>
+            </div>
+
+            {/* Rhythm */}
+            <div>
+              <div className="flex justify-between text-[11px] mb-2">
                 <label
-                  htmlFor="handCoordination"
-                  className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2"
+                  htmlFor="rhythmComplexity"
+                  className="font-bold text-stone-500 uppercase tracking-widest"
                 >
-                  Hand Coordination
+                  Rhythm Complexity
                 </label>
-                <select
-                  id="handCoordination"
-                  value={settings.handCoordination}
-                  onChange={(e) =>
-                    updateSetting(
-                      "handCoordination",
-                      e.target.value as GenerationSettings["handCoordination"],
-                    )
-                  }
-                  className="w-full text-sm p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium appearance-none"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2378716c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: `right 0.5rem center`,
-                    backgroundRepeat: `no-repeat`,
-                    backgroundSize: `1.5em 1.5em`,
-                    paddingRight: `2.5rem`,
-                  }}
+                <span className="text-amber-700 font-bold">
+                  Lvl {settings.rhythmComplexity}
+                </span>
+              </div>
+              <input
+                id="rhythmComplexity"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                value={settings.rhythmComplexity}
+                onChange={(e) =>
+                  updateSetting(
+                    "rhythmComplexity",
+                    Number(e.target.value) as DifficultyLevel,
+                  )
+                }
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+              />
+            </div>
+
+            {/* Rhythm Variance */}
+            <div>
+              <div className="flex justify-between text-[11px] mb-2">
+                <label
+                  htmlFor="rhythmVariance"
+                  className="font-bold text-stone-500 uppercase tracking-widest"
                 >
-                  <option value="SEPARATE">Hands Separate (Alternating)</option>
-                  <option value="PARALLEL">Parallel Motion (Locked)</option>
-                  <option value="INDEPENDENT">Independent (Together)</option>
-                  <option value="RANDOM">Random Mix</option>
-                </select>
+                  Rhythm Variance
+                </label>
+                <span className="text-amber-700 font-bold">
+                  {Math.round(settings.rhythmVariance * 100)}%
+                </span>
               </div>
+              <input
+                id="rhythmVariance"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={settings.rhythmVariance}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateSetting("rhythmVariance", Number(e.target.value))
+                }
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+              />
+            </div>
 
-              {/* Rhythm */}
-              <div>
-                <div className="flex justify-between text-[11px] mb-2">
-                  <label
-                    htmlFor="rhythmComplexity"
-                    className="font-bold text-stone-500 uppercase tracking-widest"
-                  >
-                    Rhythm Complexity
-                  </label>
-                  <span className="text-amber-700 font-bold">
-                    Lvl {settings.rhythmComplexity}
-                  </span>
-                </div>
-                <input
-                  id="rhythmComplexity"
-                  type="range"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={settings.rhythmComplexity}
-                  onChange={(e) =>
-                    updateSetting(
-                      "rhythmComplexity",
-                      Number(e.target.value) as DifficultyLevel,
-                    )
-                  }
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
-                />
+            {/* Max Interval */}
+            <div>
+              <div className="flex justify-between text-[11px] mb-2">
+                <label
+                  htmlFor="maxInterval"
+                  className="font-bold text-stone-500 uppercase tracking-widest"
+                >
+                  Max Leap Interval
+                </label>
+                <span className="text-stone-600 font-bold">
+                  {settings.maxInterval} semi
+                </span>
               </div>
+              <input
+                id="maxInterval"
+                type="range"
+                min="1"
+                max="12"
+                step="1"
+                value={settings.maxInterval}
+                onChange={(e) =>
+                  updateSetting("maxInterval", Number(e.target.value))
+                }
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-stone-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+              />
+            </div>
 
-              {/* Rhythm Variance */}
-              <div>
-                <div className="flex justify-between text-[11px] mb-2">
-                  <label
-                    htmlFor="rhythmVariance"
-                    className="font-bold text-stone-500 uppercase tracking-widest"
-                  >
-                    Rhythm Variance
-                  </label>
-                  <span className="text-amber-700 font-bold">
-                    {Math.round(settings.rhythmVariance * 100)}%
-                  </span>
-                </div>
-                <input
-                  id="rhythmVariance"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={settings.rhythmVariance}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    updateSetting("rhythmVariance", Number(e.target.value))
-                  }
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
-                />
+            {/* Accompaniment Style */}
+            <div>
+              <div className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">
+                Accompaniment Pools
               </div>
-
-              {/* Max Interval */}
-              <div>
-                <div className="flex justify-between text-[11px] mb-2">
-                  <label
-                    htmlFor="maxInterval"
-                    className="font-bold text-stone-500 uppercase tracking-widest"
-                  >
-                    Max Leap Interval
-                  </label>
-                  <span className="text-stone-600 font-bold">
-                    {settings.maxInterval} semi
-                  </span>
-                </div>
-                <input
-                  id="maxInterval"
-                  type="range"
-                  min="1"
-                  max="12"
-                  step="1"
-                  value={settings.maxInterval}
-                  onChange={(e) =>
-                    updateSetting("maxInterval", Number(e.target.value))
-                  }
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-stone-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
-                />
-              </div>
-
-              {/* Accompaniment Style */}
-              <div>
-                <div className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">
-                  Accompaniment Pools
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {(
-                    ["BLOCK", "BROKEN", "ALBERTI", "WALTZ", "STRIDE"] as const
-                  ).map((style) => {
-                    const currentStyles = settings.accompanimentStyle;
-                    return (
-                      <label
-                        key={style}
-                        className={`flex items-center gap-2 text-[13px] font-medium p-2 rounded-md border transition-colors cursor-pointer
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  ["BLOCK", "BROKEN", "ALBERTI", "WALTZ", "STRIDE"] as const
+                ).map((style) => {
+                  const currentStyles = settings.accompanimentStyle;
+                  return (
+                    <label
+                      key={style}
+                      className={`flex items-center gap-2 text-[13px] font-medium p-2 rounded-md border transition-colors cursor-pointer
                       ${
                         settings.handCoordination !== "INDEPENDENT"
                           ? "opacity-50 cursor-not-allowed bg-stone-50/50"
@@ -300,33 +310,32 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                           : "border-[#E8DEC1] text-stone-600"
                       }
                     `}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={currentStyles.includes(style)}
-                          onChange={(e) => {
-                            let newStyles: typeof currentStyles;
-                            if (e.target.checked) {
-                              newStyles = [...currentStyles, style];
-                            } else {
-                              newStyles = currentStyles.filter(
-                                (s) => s !== style,
-                              );
-                            }
-                            if (newStyles.length === 0) newStyles = ["BLOCK"];
-                            updateSetting("accompanimentStyle", newStyles);
-                          }}
-                          disabled={settings.handCoordination !== "INDEPENDENT"}
-                          className="rounded border-[#E8DEC1] text-amber-600 focus:ring-amber-500 w-4 h-4"
-                        />
-                        {style.charAt(0) + style.slice(1).toLowerCase()}
-                      </label>
-                    );
-                  })}
-                </div>
+                    >
+                      <input
+                        type="checkbox"
+                        checked={currentStyles.includes(style)}
+                        onChange={(e) => {
+                          let newStyles: typeof currentStyles;
+                          if (e.target.checked) {
+                            newStyles = [...currentStyles, style];
+                          } else {
+                            newStyles = currentStyles.filter(
+                              (s) => s !== style,
+                            );
+                          }
+                          if (newStyles.length === 0) newStyles = ["BLOCK"];
+                          updateSetting("accompanimentStyle", newStyles);
+                        }}
+                        disabled={settings.handCoordination !== "INDEPENDENT"}
+                        className="rounded border-[#E8DEC1] text-amber-600 focus:ring-amber-500 w-4 h-4"
+                      />
+                      {style.charAt(0) + style.slice(1).toLowerCase()}
+                    </label>
+                  );
+                })}
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -362,7 +371,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <button
         onClick={onGenerate}
         disabled={isLoading}
-        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none
+        aria-busy={isLoading}
+        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
           ${
             isLoading
               ? "bg-stone-200 text-stone-400 border border-stone-300"

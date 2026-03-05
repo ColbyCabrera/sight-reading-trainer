@@ -29,10 +29,9 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
       // We look for the midi-player element which is in the parent App component
       const midiContainer = document.getElementById('midi-player');
       if (midiContainer && window.ABCJS.synth) {
-        // Clear previous player content to avoid duplicates
-        midiContainer.innerHTML = "";
-
         if (window.ABCJS.synth.supportsAudio()) {
+          // Clear previous player content to avoid duplicates
+          midiContainer.replaceChildren();
           const synthControl = new window.ABCJS.synth.SynthController();
           synthControlRef.current = synthControl;
 
@@ -64,7 +63,11 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
             console.warn("Audio problem:", error);
           });
         } else {
-          midiContainer.innerHTML = "<div class='text-xs text-red-400'>Audio not supported in this browser.</div>";
+          // Clear previous content and append error message in one step
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'text-xs text-red-400';
+          errorDiv.textContent = 'Audio not supported in this browser.';
+          midiContainer.replaceChildren(errorDiv);
         }
       }
     }
@@ -87,7 +90,7 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
       }
       // Explicitly clear the container to ensure buttons are removed
       const midiContainer = document.getElementById('midi-player');
-      if (midiContainer) midiContainer.innerHTML = "";
+      if (midiContainer) midiContainer.replaceChildren();
     };
   }, [abcNotation]);
 

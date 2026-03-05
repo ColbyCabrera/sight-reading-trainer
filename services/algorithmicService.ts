@@ -548,10 +548,21 @@ class AbcEngraver {
         baseLetter = naturalMatch;
         accShift = 0;
       } else {
-        const useFlats =
+        let useFlats =
           (keyData.flats || 0) > 0 ||
           keyName.includes("F Major") ||
           keyName.includes("D Minor");
+
+        // Force sharps for raised 6th/7th in minor keys
+        if (keyData.type === "MINOR") {
+          const rootPC = keyData.root % 12;
+          const raised6th = (rootPC + 9) % 12;
+          const raised7th = (rootPC + 11) % 12;
+          if (pc === raised6th || pc === raised7th) {
+            useFlats = false;
+          }
+        }
+
         if (useFlats) {
           const nextPC = (pc + 1) % 12;
           const nextLetter = Object.keys(standardMap).find(

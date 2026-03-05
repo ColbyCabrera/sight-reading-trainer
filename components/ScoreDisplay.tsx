@@ -64,7 +64,6 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
             console.warn("Audio problem:", error);
           });
         } else {
-          midiContainer.replaceChildren();
           const errorDiv = document.createElement('div');
           errorDiv.className = 'text-xs text-red-400';
           errorDiv.textContent = 'Audio not supported in this browser.';

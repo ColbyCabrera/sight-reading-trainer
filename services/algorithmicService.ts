@@ -414,7 +414,7 @@ class AbcEngraver {
   static render(score: ScoreStructure): string {
     let abc = `X:1\n`;
     abc += `T:${score.title}\n`;
-    abc += `C:At First Sight AI\n`;
+    abc += `C:a computer\n`;
     abc += `M:${score.timeSignature}\n`;
     abc += `L:1/4\n`;
     abc += `Q:1/4=${score.tempo}\n`;

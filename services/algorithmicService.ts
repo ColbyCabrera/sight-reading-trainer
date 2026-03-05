@@ -540,24 +540,34 @@ class AbcEngraver {
     let accShift = 0;
 
     if (!baseLetter) {
+      let isRaisedMinor = false;
+
+      // Check if this note is the raised 6th or 7th in a minor key
+      if (keyData.type === "MINOR") {
+        const rootPC = keyData.root % 12;
+        const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
+        const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
+        if (pc === raised6th || pc === raised7th) {
+          isRaisedMinor = true;
+        }
+      }
+
       const naturalMatch = Object.keys(standardMap).find(
         (k) => standardMap[k] === pc,
       );
-      if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+
+      // We only apply a natural match immediately if it is NOT a raised minor degree
+      // that should be forced to be spelled as a sharp.
+      if (naturalMatch && diatonicMap[naturalMatch] !== pc && !isRaisedMinor) {
         acc = "=";
         baseLetter = naturalMatch;
         accShift = 0;
       } else {
         let useFlats = (keyData.flats || 0) > 0;
 
-        // Force sharps for raised 6th/7th in minor keys
-        if (keyData.type === "MINOR") {
-          const rootPC = keyData.root % 12;
-          const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
-          const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
-          if (pc === raised6th || pc === raised7th) {
-            useFlats = false;
-          }
+        // Override for raised minor 6th/7th
+        if (isRaisedMinor) {
+          useFlats = false;
         }
 
         if (useFlats) {
@@ -569,6 +579,10 @@ class AbcEngraver {
             acc = "_";
             baseLetter = nextLetter;
             accShift = -1;
+          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+            acc = "=";
+            baseLetter = naturalMatch;
+            accShift = 0;
           }
         } else {
           const prevPC = (pc - 1 + 12) % 12;
@@ -579,6 +593,10 @@ class AbcEngraver {
             acc = "^";
             baseLetter = prevLetter;
             accShift = 1;
+          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+            acc = "=";
+            baseLetter = naturalMatch;
+            accShift = 0;
           }
         }
       }

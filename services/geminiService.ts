@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { SightReadingExercise, DifficultyLevel, MusicalKey } from "../types";
+import type { SightReadingExercise, DifficultyLevel, MusicalKey } from "../types.ts";
 
 const getSystemInstruction = () => `
 You are a world-class composer and piano pedagogue. Your goal is to generate specific, high-quality piano sight-reading exercises in ABC notation.

@@ -524,23 +524,35 @@ class AbcEngraver {
     return map;
   }
 
+  private static diatonicCache: Record<string, Record<number, string>> = {};
+  private static standardReverseMap: Record<number, string> = {
+    0: "C",
+    2: "D",
+    4: "E",
+    5: "F",
+    7: "G",
+    9: "A",
+    11: "B",
+  };
+
   private static midiToAbcToken(midi: number, keyName: string): string {
     const pc = midi % 12;
+
+    // Memoize the reverse diatonic map per key to avoid recalculating
+    if (!this.diatonicCache[keyName]) {
+      const dMap = this.getDiatonicPitchClasses(keyName);
+      const reverseMap: Record<number, string> = {};
+      for (const key in dMap) {
+        reverseMap[dMap[key]] = key;
+      }
+      this.diatonicCache[keyName] = reverseMap;
+    }
+
+    const reverseDiatonicMap = this.diatonicCache[keyName];
     const diatonicMap = this.getDiatonicPitchClasses(keyName);
     const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
-    const standardMap: Record<string, number> = {
-      C: 0,
-      D: 2,
-      E: 4,
-      F: 5,
-      G: 7,
-      A: 9,
-      B: 11,
-    };
 
-    let matchedLetter = Object.keys(diatonicMap).find(
-      (k) => diatonicMap[k] === pc,
-    );
+    let matchedLetter = reverseDiatonicMap[pc];
     let acc = "";
     let baseLetter = matchedLetter;
     let accShift = 0;
@@ -558,9 +570,7 @@ class AbcEngraver {
         }
       }
 
-      const naturalMatch = Object.keys(standardMap).find(
-        (k) => standardMap[k] === pc,
-      );
+      const naturalMatch = this.standardReverseMap[pc];
 
       // We only apply a natural match immediately if it is NOT a raised minor degree
       // that should be forced to be spelled as a sharp.
@@ -578,9 +588,7 @@ class AbcEngraver {
 
         if (useFlats) {
           const nextPC = (pc + 1) % 12;
-          const nextLetter = Object.keys(standardMap).find(
-            (k) => standardMap[k] === nextPC,
-          );
+          const nextLetter = this.standardReverseMap[nextPC];
           if (nextLetter) {
             acc = "_";
             baseLetter = nextLetter;
@@ -592,9 +600,7 @@ class AbcEngraver {
           }
         } else {
           const prevPC = (pc - 1 + 12) % 12;
-          const prevLetter = Object.keys(standardMap).find(
-            (k) => standardMap[k] === prevPC,
-          );
+          const prevLetter = this.standardReverseMap[prevPC];
           if (prevLetter) {
             acc = "^";
             baseLetter = prevLetter;

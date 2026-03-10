@@ -21,15 +21,35 @@ import type {
 } from "../utils/musicTheory.ts";
 
 /**
- * ALGORITHMIC COMPOSITION PIPELINE
+ * Generates sight-reading exercises entirely from local rules and music-theory
+ * primitives. The pipeline is intentionally staged so each part of the score
+ * can be reasoned about independently:
+ *
+ * 1. Resolve user-facing settings and normalize difficulty-specific behavior.
+ * 2. Build a harmonic skeleton for the full exercise.
+ * 3. Generate rhythmic motifs and a melodic source line.
+ * 4. Derive the right-hand and left-hand parts from the source material.
+ * 5. Apply expressive markings such as dynamics.
+ * 6. Engrave the internal score representation into ABC notation.
+ *
+ * The result is deterministic only at the structural level; musical variety
+ * comes from controlled randomness within the chosen difficulty profile.
  */
 
 // --- HELPERS ---
+/** Returns an integer in the inclusive range [min, max]. */
 const getRandomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
+
+/** Returns a random element from a non-empty array. */
 const getRandomElement = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 
+/**
+ * Maps the public difficulty level to a smaller set of internal composition
+ * profiles. Several adjacent levels intentionally share the same profile so
+ * the musical vocabulary grows in broader tiers rather than one level at a time.
+ */
 const getInternalProfile = (
   level: DifficultyLevel,
 ): InternalDifficultyProfile => {
@@ -41,7 +61,22 @@ const getInternalProfile = (
 };
 
 // --- STAGE 2: GENERATORS ---
+/**
+ * Produces measure-level rhythm patterns from the pre-defined rhythm library.
+ *
+ * The generator balances repetition and novelty by creating two anchor motifs,
+ * then reusing or replacing them according to the requested variance. The last
+ * measure is forced to a long value to create a stable cadence.
+ */
 class RhythmGenerator {
+  /**
+   * Builds one rhythm pattern per measure.
+   *
+   * @param measures Number of measures to generate.
+   * @param timeSig Meter used to choose compatible rhythm cells.
+   * @param complexity Rhythm difficulty bucket.
+   * @param variance Probability of using rarer or newly selected patterns.
+   */
   static generate(
     measures: number,
     timeSig: "4/4" | "3/4",
@@ -98,6 +133,14 @@ class RhythmGenerator {
   }
 }
 
+/**
+ * Encapsulates key-aware harmonic and melodic decisions.
+ *
+ * This engine precomputes the usable scale tones across the full MIDI range and
+ * exposes helpers for chord construction and melody pitch selection. The melody
+ * solver uses a cost function rather than strict rules so the output remains
+ * musical while still respecting pedagogical constraints.
+ */
 class HarmonicEngine {
   public profile: InternalDifficultyProfile;
   public settings: GenerationSettings;
@@ -106,6 +149,12 @@ class HarmonicEngine {
   public scaleNotes: number[];
   private scaleIntervals: number[];
 
+  /**
+   * @param profile Internal tuning values for penalties, ranges, and harmony.
+   * @param settings User-visible generation settings after difficulty expansion.
+   * @param keyRoot MIDI pitch class anchor for the selected key.
+   * @param keyType Major or minor mode for scale and accidental logic.
+   */
   constructor(
     profile: InternalDifficultyProfile,
     settings: GenerationSettings,
@@ -127,6 +176,10 @@ class HarmonicEngine {
     }
   }
 
+  /**
+   * Returns a close-position triad for the given scale degree around a target
+   * octave. Minor-mode dominant harmony raises the leading tone when needed.
+   */
   public getChordTones(degree: number, baseOctave: number): number[] {
     const triadIndices = [degree, degree + 2, degree + 4];
     const chordMidi: number[] = [];
@@ -148,6 +201,13 @@ class HarmonicEngine {
     return chordMidi.sort((a, b) => a - b);
   }
 
+  /**
+   * Chooses the next melody note by minimizing a weighted musical cost.
+   *
+   * The cost function favors small intervals, discourages repeated large leaps,
+   * prefers chord tones on strong beats, and respects the configured maximum
+   * interval and hand range.
+   */
   public solveMelodyPitch(
     currentMeasureChord: number,
     prevPitch: number,
@@ -209,12 +269,28 @@ class HarmonicEngine {
   }
 }
 
+/**
+ * Converts the source melody and harmonic plan into a left-hand part.
+ *
+ * Depending on hand coordination, the output ranges from simple mirrored motion
+ * to a fully independent accompaniment pattern selected from several styles.
+ */
 class AccompanimentGenerator {
   private engine: HarmonicEngine;
   constructor(engine: HarmonicEngine) {
     this.engine = engine;
   }
 
+  /**
+   * Builds the final left-hand measures for the score.
+   *
+   * @param sourceMeasures Melody-first measure data used as accompaniment input.
+   * @param measures Total number of measures in the piece.
+   * @param progression Harmonic degree for each measure.
+   * @param timeSig Active time signature.
+   * @param settings Resolved generation settings.
+   * @param handAssignments Measure-by-measure melody hand ownership.
+   */
   public generate(
     sourceMeasures: Measure[],
     measures: number,
@@ -377,7 +453,15 @@ class AccompanimentGenerator {
   }
 }
 
+/**
+ * Applies simple phrase-level dynamic contrast after pitches and rhythms have
+ * already been generated. This keeps expression independent from note choice.
+ */
 class DynamicsGenerator {
+  /**
+   * Adds starting and contrast dynamics to the first playable token in the
+   * relevant hand at a few structural points in the exercise.
+   */
   static apply(
     rhMeasures: Measure[],
     lhMeasures: Measure[],
@@ -416,7 +500,15 @@ class DynamicsGenerator {
   }
 }
 
+/**
+ * Renders the internal score structure into ABC notation.
+ *
+ * ABC is the interchange format consumed by the rest of the app for display and
+ * playback. This class is responsible for preserving meter, key, note spelling,
+ * chords, rests, dynamics, and octave placement.
+ */
 class AbcEngraver {
+  /** Converts a fully assembled score object into an ABC document string. */
   static render(score: ScoreStructure): string {
     let abc = `X:1\n`;
     abc += `T:${score.title}\n`;
@@ -493,6 +585,10 @@ class AbcEngraver {
     return abc;
   }
 
+  /**
+   * Builds the diatonic pitch-class map for a key signature after applying all
+   * sharps or flats from the signature itself.
+   */
   private static getDiatonicPitchClasses(
     keyName: string,
   ): Record<string, number> {
@@ -524,6 +620,12 @@ class AbcEngraver {
     return map;
   }
 
+  /**
+   * Per-key cache of pitch spelling data used during engraving.
+   *
+   * `forward` maps note letters to pitch classes in the active key signature.
+   * `reverse` maps pitch classes back to their preferred diatonic letters.
+   */
   private static diatonicCache: Record<
     string,
     {
@@ -531,6 +633,12 @@ class AbcEngraver {
       reverse: Record<number, string>;
     }
   > = {};
+
+  /**
+   * Default pitch-class-to-letter mapping that prefers natural note names.
+   * This is used as a fallback when the active key signature does not directly
+   * contain the required pitch spelling.
+   */
   private static standardReverseMap: Record<number, string> = NOTES.reduce<
     Record<number, string>
   >((map, note, pitchClass) => {
@@ -540,6 +648,13 @@ class AbcEngraver {
     return map;
   }, {});
 
+  /**
+   * Converts a MIDI note number into an ABC note token with key-aware spelling.
+   *
+   * The method first tries the diatonic spelling implied by the key signature,
+   * then falls back to an explicit accidental strategy. Minor-mode raised scale
+   * degrees are spelled with sharps to avoid incorrect flat-based notation.
+   */
   private static midiToAbcToken(midi: number, keyName: string): string {
     const pc = midi % 12;
 
@@ -643,6 +758,14 @@ class AbcEngraver {
 
 // --- MAIN PIPELINE ORCHESTRATOR ---
 
+/**
+ * Generates a complete sight-reading exercise and returns both metadata and the
+ * engraved ABC notation consumed by the UI.
+ *
+ * @param difficulty Public difficulty level selected by the user.
+ * @param selectedKey Specific key or `Random` for weighted random selection.
+ * @param customSettings Optional overrides for the default level settings.
+ */
 export const generateAlgorithmicSheetMusic = (
   difficulty: DifficultyLevel,
   selectedKey: MusicalKey,

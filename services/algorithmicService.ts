@@ -216,7 +216,7 @@ class AccompanimentGenerator {
   }
 
   public generate(
-    sourceMeasures: Measure[], // Now accepting source measures (always has notes)
+    sourceMeasures: Measure[],
     measures: number,
     progression: number[],
     timeSig: "4/4" | "3/4",

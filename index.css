@@ -4,37 +4,44 @@
 
 :root {
   /* Color Palette - Tactile & Acoustic (Warm Paper Theme) */
-  --bg-primary: #FDFBF7;
+  --bg-primary: #fdfbf7;
   /* Warmer, lighter Ivory/Paper core */
-  --bg-surface: #FFFFFF;
+  --bg-surface: #ffffff;
   /* Crisp white for physical elements like keys */
 
-  --text-main: #3E3B35;
+  --text-main: #3e3b35;
   /* Warm deep dark brown/charcoal */
-  --text-muted: #9E998F;
+  --text-muted: #9e998f;
   /* Warm stone-like muted text */
 
-  --accent-gold: #D4AF37;
+  --accent-gold: #d4af37;
   /* Muted Gold for streaks/progress */
-  --accent-green: #5A8C5B;
+  --accent-green: #5a8c5b;
   /* Warmer Muted Green for correct answers */
-  --accent-red: #D66E6E;
+  --accent-red: #d66e6e;
   /* Warmer Soft Red for incorrect answers */
 
   /* Soft UI / Neumorphism Shadows (Warmer tints) */
   /* Used for elevated cards or unpressed buttons/keys */
-  --shadow-soft: 4px 4px 12px rgba(180, 170, 150, 0.15), -4px -4px 12px rgba(255, 255, 255, 0.9);
+  --shadow-soft: 4px 4px 12px rgba(180, 170, 150, 0.15),
+    -4px -4px 12px rgba(255, 255, 255, 0.9);
   /* Used for pressed states (e.g. active piano keys) */
-  --shadow-inset: inset 2px 2px 6px rgba(180, 170, 150, 0.2), inset -2px -2px 6px rgba(255, 255, 255, 0.9);
+  --shadow-inset: inset 2px 2px 6px rgba(180, 170, 150, 0.2),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.9);
 
   /* Transitions */
-  --transition-smooth: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-main);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -77,28 +84,154 @@ body {
   box-shadow: var(--shadow-soft), 0 0 0 3px rgba(212, 175, 55, 0.3);
 }
 
-/* Firefox range input styling */
-input[type="range"]::-moz-range-track {
-  height: 6px;
-  background-color: #E8DEC1;
+/* ── Range Slider – Primary (Difficulty) ──────────────────────── */
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #d97706 var(--fill, 0%),
+    #e8dec1 var(--fill, 0%)
+  );
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.range-slider:focus-visible {
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35);
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: 3px solid #fdfbf7;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.35), 0 0 0 1px rgba(180, 83, 9, 0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(180, 83, 9, 0.4), 0 0 0 1px rgba(180, 83, 9, 0.12);
+}
+
+.range-slider:active::-webkit-slider-thumb {
+  transform: scale(1.05);
+}
+
+.range-slider::-moz-range-track {
+  height: 8px;
+  background: #e8dec1;
   border-radius: 9999px;
   border: none;
 }
 
-input[type="range"]::-moz-range-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
+.range-slider::-moz-range-progress {
+  height: 8px;
+  background: #d97706;
   border-radius: 9999px;
-  background-color: #b45309;
-  /* amber-700 */
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.range-slider::-moz-range-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: 3px solid #fdfbf7;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.35);
   cursor: pointer;
 }
 
-/* Smaller thumb variant used in advanced settings sliders */
-.advanced-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+/* ── Range Slider – Small (Advanced settings) ────────────────── */
+.range-slider-sm {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #d97706 var(--fill, 0%),
+    #e8dec1 var(--fill, 0%)
+  );
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.range-slider-sm:focus-visible {
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35);
+}
+
+.range-slider-sm::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: 2px solid #fdfbf7;
+  box-shadow: 0 1px 4px rgba(180, 83, 9, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.range-slider-sm::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.35);
+}
+
+.range-slider-sm:active::-webkit-slider-thumb {
+  transform: scale(1.05);
+}
+
+/* Neutral accent variant for non-tonal sliders (e.g. interval) */
+.range-slider-sm.neutral {
+  background: linear-gradient(
+    to right,
+    #78716c var(--fill, 0%),
+    #e8dec1 var(--fill, 0%)
+  );
+}
+
+.range-slider-sm.neutral::-webkit-slider-thumb {
+  background: linear-gradient(135deg, #a8a29e, #57534e);
+  box-shadow: 0 1px 4px rgba(87, 83, 78, 0.3);
+}
+
+.range-slider-sm::-moz-range-track {
+  height: 6px;
+  background: #e8dec1;
+  border-radius: 9999px;
+  border: none;
+}
+
+.range-slider-sm::-moz-range-progress {
+  height: 6px;
+  background: #d97706;
+  border-radius: 9999px;
+}
+
+.range-slider-sm.neutral::-moz-range-progress {
+  background: #78716c;
+}
+
+.range-slider-sm::-moz-range-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: 2px solid #fdfbf7;
+  box-shadow: 0 1px 4px rgba(180, 83, 9, 0.3);
+  cursor: pointer;
 }

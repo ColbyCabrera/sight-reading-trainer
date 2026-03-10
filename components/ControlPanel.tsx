@@ -134,7 +134,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             onChange={(e) =>
               onDifficultyChange(Number(e.target.value) as DifficultyLevel)
             }
-            className="w-full h-2 rounded-lg appearance-none cursor-pointer focus:outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px]"
+            className="range-slider"
+            style={
+              {
+                "--fill": `${((difficulty - 1) / 9) * 100}%`,
+              } as React.CSSProperties
+            }
             disabled={isLoading}
           />
         </div>
@@ -244,7 +249,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Number(e.target.value) as DifficultyLevel,
                   )
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm"
+                style={
+                  {
+                    "--fill": `${((settings.rhythmComplexity - 1) / 9) * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 
@@ -271,7 +281,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   updateSetting("rhythmVariance", Number(e.target.value))
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm"
+                style={
+                  {
+                    "--fill": `${settings.rhythmVariance * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 
@@ -298,7 +313,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e) =>
                   updateSetting("maxInterval", Number(e.target.value))
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-stone-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm neutral"
+                style={
+                  {
+                    "--fill": `${((settings.maxInterval - 1) / 11) * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 

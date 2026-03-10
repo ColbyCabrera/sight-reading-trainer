@@ -649,6 +649,82 @@ class AbcEngraver {
   }, {});
 
   /**
+   * Resolves the accidental spelling for a pitch class that is not diatonic
+   * to the current key. Returns the ABC accidental prefix, the base note
+   * letter, and the semitone shift applied by the accidental.
+   */
+  private static resolveAccidental(
+    pc: number,
+    keyData: {
+      root: number;
+      type: "MAJOR" | "MINOR";
+      flats?: number;
+      sharps?: number;
+    },
+    diatonicMap: Record<string, number>,
+  ): { acc: string; baseLetter: string; accShift: number } {
+    let isRaisedMinor = false;
+
+    // Check if this note is the raised 6th or 7th in a minor key
+    if (keyData.type === "MINOR") {
+      const rootPC = keyData.root % 12;
+      const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
+      const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
+      if (pc === raised6th || pc === raised7th) {
+        isRaisedMinor = true;
+      }
+    }
+
+    const naturalMatch = this.standardReverseMap[pc];
+
+    // Apply a natural match immediately if it is NOT a raised minor degree
+    // that should be forced to be spelled as a sharp.
+    if (naturalMatch && diatonicMap[naturalMatch] !== pc && !isRaisedMinor) {
+      return { acc: "=", baseLetter: naturalMatch, accShift: 0 };
+    }
+
+    let useFlats = (keyData.flats || 0) > 0;
+
+    // Override for raised minor 6th/7th
+    if (isRaisedMinor) {
+      useFlats = false;
+    }
+
+    if (useFlats) {
+      const nextPC = (pc + 1) % 12;
+      const nextLetter = this.standardReverseMap[nextPC];
+      if (nextLetter) {
+        return { acc: "_", baseLetter: nextLetter, accShift: -1 };
+      }
+    } else {
+      const prevPC = (pc - 1 + 12) % 12;
+      const prevLetter = this.standardReverseMap[prevPC];
+      if (prevLetter) {
+        return { acc: "^", baseLetter: prevLetter, accShift: 1 };
+      }
+    }
+
+    // Last resort: natural sign on the closest standard note
+    if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+      return { acc: "=", baseLetter: naturalMatch, accShift: 0 };
+    }
+
+    return { acc: "", baseLetter: "C", accShift: 0 };
+  }
+
+  /**
+   * Formats a note letter into ABC octave notation.
+   * ABC uses uppercase for octave 4, commas below, lowercase + tick above.
+   */
+  private static formatAbcOctave(letter: string, octave: number): string {
+    if (octave <= 2) return letter + ",,";
+    if (octave === 3) return letter + ",";
+    if (octave === 4) return letter;
+    if (octave === 5) return letter.toLowerCase();
+    return letter.toLowerCase() + "'";
+  }
+
+  /**
    * Converts a MIDI note number into an ABC note token with key-aware spelling.
    *
    * The method first tries the diatonic spelling implied by the key signature,
@@ -675,84 +751,23 @@ class AbcEngraver {
       this.diatonicCache[keyName];
     const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
 
-    let matchedLetter = reverseDiatonicMap[pc];
+    // Try diatonic spelling first
+    const diatonicLetter = reverseDiatonicMap[pc];
     let acc = "";
-    let baseLetter = matchedLetter;
+    let baseLetter = diatonicLetter;
     let accShift = 0;
 
     if (!baseLetter) {
-      let isRaisedMinor = false;
-
-      // Check if this note is the raised 6th or 7th in a minor key
-      if (keyData.type === "MINOR") {
-        const rootPC = keyData.root % 12;
-        const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
-        const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
-        if (pc === raised6th || pc === raised7th) {
-          isRaisedMinor = true;
-        }
-      }
-
-      const naturalMatch = this.standardReverseMap[pc];
-
-      // We only apply a natural match immediately if it is NOT a raised minor degree
-      // that should be forced to be spelled as a sharp.
-      if (naturalMatch && diatonicMap[naturalMatch] !== pc && !isRaisedMinor) {
-        acc = "=";
-        baseLetter = naturalMatch;
-        accShift = 0;
-      } else {
-        let useFlats = (keyData.flats || 0) > 0;
-
-        // Override for raised minor 6th/7th
-        if (isRaisedMinor) {
-          useFlats = false;
-        }
-
-        if (useFlats) {
-          const nextPC = (pc + 1) % 12;
-          const nextLetter = this.standardReverseMap[nextPC];
-          if (nextLetter) {
-            acc = "_";
-            baseLetter = nextLetter;
-            accShift = -1;
-          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
-            acc = "=";
-            baseLetter = naturalMatch;
-            accShift = 0;
-          }
-        } else {
-          const prevPC = (pc - 1 + 12) % 12;
-          const prevLetter = this.standardReverseMap[prevPC];
-          if (prevLetter) {
-            acc = "^";
-            baseLetter = prevLetter;
-            accShift = 1;
-          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
-            acc = "=";
-            baseLetter = naturalMatch;
-            accShift = 0;
-          }
-        }
-      }
+      ({ acc, baseLetter, accShift } = this.resolveAccidental(
+        pc,
+        keyData,
+        diatonicMap,
+      ));
     }
 
-    if (!baseLetter) baseLetter = "C";
     const baseMidi = midi - accShift;
     const octave = Math.floor(baseMidi / 12) - 1;
-    let abcStr = baseLetter!;
-    if (octave === 2) {
-      abcStr = abcStr + ",,";
-    } else if (octave === 3) {
-      abcStr = abcStr + ",";
-    } else if (octave === 4) {
-      abcStr = abcStr;
-    } else if (octave === 5) {
-      abcStr = abcStr.toLowerCase();
-    } else if (octave === 6) {
-      abcStr = abcStr.toLowerCase() + "'";
-    }
-    return acc + abcStr;
+    return acc + this.formatAbcOctave(baseLetter, octave);
   }
 }
 

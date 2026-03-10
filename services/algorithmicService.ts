@@ -524,32 +524,40 @@ class AbcEngraver {
     return map;
   }
 
-  private static diatonicCache: Record<string, Record<number, string>> = {};
-  private static standardReverseMap: Record<number, string> = {
-    0: "C",
-    2: "D",
-    4: "E",
-    5: "F",
-    7: "G",
-    9: "A",
-    11: "B",
-  };
+  private static diatonicCache: Record<
+    string,
+    {
+      forward: Record<string, number>;
+      reverse: Record<number, string>;
+    }
+  > = {};
+  private static standardReverseMap: Record<number, string> = NOTES.reduce<
+    Record<number, string>
+  >((map, note, pitchClass) => {
+    if (!note.includes("#")) {
+      map[pitchClass] = note;
+    }
+    return map;
+  }, {});
 
   private static midiToAbcToken(midi: number, keyName: string): string {
     const pc = midi % 12;
 
-    // Memoize the reverse diatonic map per key to avoid recalculating
+    // Memoize both diatonic maps per key to avoid recalculating and reallocating.
     if (!this.diatonicCache[keyName]) {
-      const dMap = this.getDiatonicPitchClasses(keyName);
+      const forwardMap = this.getDiatonicPitchClasses(keyName);
       const reverseMap: Record<number, string> = {};
-      for (const key in dMap) {
-        reverseMap[dMap[key]] = key;
+      for (const noteName in forwardMap) {
+        reverseMap[forwardMap[noteName]] = noteName;
       }
-      this.diatonicCache[keyName] = reverseMap;
+      this.diatonicCache[keyName] = {
+        forward: forwardMap,
+        reverse: reverseMap,
+      };
     }
 
-    const reverseDiatonicMap = this.diatonicCache[keyName];
-    const diatonicMap = this.getDiatonicPitchClasses(keyName);
+    const { forward: diatonicMap, reverse: reverseDiatonicMap } =
+      this.diatonicCache[keyName];
     const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
 
     let matchedLetter = reverseDiatonicMap[pc];

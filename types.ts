@@ -1,7 +1,12 @@
 
 export type DifficultyLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
-export type MusicalKey = 'Random' | 'C Major' | 'A Minor' | 'G Major' | 'E Minor' | 'F Major' | 'D Minor' | 'D Major' | 'B Minor' | 'Bb Major' | 'G Minor' | 'A Major' | 'F# Minor' | 'Eb Major' | 'C Minor';
+export type MusicalKey =
+  | 'Random'
+  | 'C Major' | 'G Major' | 'D Major' | 'A Major' | 'E Major' | 'B Major' | 'F# Major' | 'C# Major'
+  | 'F Major' | 'Bb Major' | 'Eb Major' | 'Ab Major' | 'Db Major' | 'Gb Major' | 'Cb Major'
+  | 'A Minor' | 'E Minor' | 'B Minor' | 'F# Minor'
+  | 'D Minor' | 'G Minor' | 'C Minor';
 
 export type GenerationMode = 'AI' | 'Algorithm';
 

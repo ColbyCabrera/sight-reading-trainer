@@ -21,22 +21,23 @@ interface ControlPanelProps {
   onGenerate: () => void;
 }
 
-const KEYS: MusicalKey[] = [
-  "Random",
-  "C Major",
-  "A Minor",
-  "G Major",
-  "E Minor",
-  "F Major",
-  "D Minor",
-  "D Major",
-  "B Minor",
-  "Bb Major",
-  "G Minor",
-  "A Major",
-  "F# Minor",
-  "Eb Major",
-  "C Minor",
+const KEY_GROUPS: { label: string; keys: MusicalKey[] }[] = [
+  {
+    label: "Major Keys",
+    keys: [
+      "C Major", "G Major", "D Major", "A Major", "E Major",
+      "B Major", "F# Major", "C# Major",
+      "F Major", "Bb Major", "Eb Major", "Ab Major",
+      "Db Major", "Gb Major", "Cb Major",
+    ],
+  },
+  {
+    label: "Minor Keys",
+    keys: [
+      "A Minor", "E Minor", "B Minor", "F# Minor",
+      "D Minor", "G Minor", "C Minor",
+    ],
+  },
 ];
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -360,10 +361,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             paddingRight: `2.5rem`,
           }}
         >
-          {KEYS.map((k) => (
-            <option key={k} value={k}>
-              {k}
-            </option>
+          <option value="Random">Random</option>
+          {KEY_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.keys.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>

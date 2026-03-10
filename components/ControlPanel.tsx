@@ -6,7 +6,6 @@ import {
   GenerationMode,
   GenerationSettings,
 } from "../types";
-import { getSettingsForLevel } from "../utils/musicTheory";
 
 interface ControlPanelProps {
   difficulty: DifficultyLevel;
@@ -21,22 +20,39 @@ interface ControlPanelProps {
   onGenerate: () => void;
 }
 
-const KEYS: MusicalKey[] = [
-  "Random",
-  "C Major",
-  "A Minor",
-  "G Major",
-  "E Minor",
-  "F Major",
-  "D Minor",
-  "D Major",
-  "B Minor",
-  "Bb Major",
-  "G Minor",
-  "A Major",
-  "F# Minor",
-  "Eb Major",
-  "C Minor",
+const KEY_GROUPS: { label: string; keys: MusicalKey[] }[] = [
+  {
+    label: "Major Keys",
+    keys: [
+      "C Major",
+      "G Major",
+      "D Major",
+      "A Major",
+      "E Major",
+      "B Major",
+      "F# Major",
+      "C# Major",
+      "F Major",
+      "Bb Major",
+      "Eb Major",
+      "Ab Major",
+      "Db Major",
+      "Gb Major",
+      "Cb Major",
+    ],
+  },
+  {
+    label: "Minor Keys",
+    keys: [
+      "A Minor",
+      "E Minor",
+      "B Minor",
+      "F# Minor",
+      "D Minor",
+      "G Minor",
+      "C Minor",
+    ],
+  },
 ];
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -64,7 +80,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="soft-surface p-8 border border-black/5">
+    <div className="soft-surface p-6 border border-black/5">
       <h2 className="text-xl font-bold text-slate-800 mb-6 font-heading tracking-tight">
         Settings
       </h2>
@@ -117,7 +133,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             onChange={(e) =>
               onDifficultyChange(Number(e.target.value) as DifficultyLevel)
             }
-            className="w-full h-2 rounded-lg appearance-none cursor-pointer focus:outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:mt-[-6px]"
+            className="range-slider"
+            style={
+              {
+                "--fill": `${((difficulty - 1) / 9) * 100}%`,
+              } as React.CSSProperties
+            }
             disabled={isLoading}
           />
         </div>
@@ -227,7 +248,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     Number(e.target.value) as DifficultyLevel,
                   )
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm"
+                style={
+                  {
+                    "--fill": `${((settings.rhythmComplexity - 1) / 9) * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 
@@ -254,7 +280,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   updateSetting("rhythmVariance", Number(e.target.value))
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-amber-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm"
+                style={
+                  {
+                    "--fill": `${settings.rhythmVariance * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 
@@ -281,7 +312,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e) =>
                   updateSetting("maxInterval", Number(e.target.value))
                 }
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-runnable-track]:bg-[#E8DEC1] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-stone-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:mt-[-5px]"
+                className="range-slider-sm neutral"
+                style={
+                  {
+                    "--fill": `${((settings.maxInterval - 1) / 11) * 100}%`,
+                  } as React.CSSProperties
+                }
               />
             </div>
 
@@ -360,10 +396,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             paddingRight: `2.5rem`,
           }}
         >
-          {KEYS.map((k) => (
-            <option key={k} value={k}>
-              {k}
-            </option>
+          <option value="Random">Random</option>
+          {KEY_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.keys.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>
@@ -372,48 +413,31 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         onClick={onGenerate}
         disabled={isLoading}
         aria-busy={isLoading}
-        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
+        className={`btn-generate w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
           ${
             isLoading
-              ? "bg-stone-200 text-stone-400 border border-stone-300"
-              : "bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white shadow-[0_4px_14px_0_rgba(180,83,9,0.39)] hover:shadow-[0_6px_20px_rgba(180,83,9,0.23)] hover:-translate-y-[1px] active:translate-y-[1px] border border-amber-500/30"
+              ? "bg-stone-200 text-stone-400 border border-stone-300 cursor-not-allowed"
+              : "bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 text-white shadow-[0_4px_14px_0_rgba(180,83,9,0.39)] hover:shadow-[0_6px_20px_rgba(180,83,9,0.23)] hover:-translate-y-[1px] active:translate-y-[1px] active:shadow-[0_2px_8px_rgba(180,83,9,0.3)] border border-amber-500/30"
           }
         `}
       >
         {/* Shine sweep on hover */}
-        {!isLoading && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out z-0" />
-        )}
+        {!isLoading && <div className="shine" />}
 
         <div className="relative z-10">
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <svg
-                className="animate-spin h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+            <div className="flex items-center justify-center gap-3">
+              <div className="note-bounce flex gap-1 text-base">
+                <span>♩</span>
+                <span>♪</span>
+                <span>♫</span>
+              </div>
               <span>Composing...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
               <svg
-                className="w-5 h-5 shrink-0 transition-transform group-hover:-rotate-12 duration-300"
+                className="w-5 h-5 shrink-0 transition-transform group-hover:-rotate-12 group-hover:scale-110 duration-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -430,14 +454,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           )}
         </div>
       </button>
-
-      <div className="mt-5 text-[10px] font-bold uppercase tracking-widest text-stone-400 text-center flex items-center justify-center gap-2">
-        <span className="w-4 h-[1px] bg-stone-200"></span>
-        {generationMode === "Algorithm"
-          ? "Procedural Generation Engine"
-          : "Google Gemini 2.5 AI"}
-        <span className="w-4 h-[1px] bg-stone-200"></span>
-      </div>
     </div>
   );
 };

@@ -404,7 +404,7 @@ class AccompanimentGenerator {
               tokens.push({ type: "note", pitch: p, duration: 0.5 }),
             );
           } else {
-            const pattern = [root, fifth, third, fifth, root, third];
+            const pattern = [root, fifth, third, fifth, third, fifth];
             pattern.forEach((p) =>
               tokens.push({ type: "note", pitch: p, duration: 0.5 }),
             );

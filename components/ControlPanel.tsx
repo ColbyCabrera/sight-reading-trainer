@@ -6,7 +6,6 @@ import {
   GenerationMode,
   GenerationSettings,
 } from "../types";
-import { getSettingsForLevel } from "../utils/musicTheory";
 
 interface ControlPanelProps {
   difficulty: DifficultyLevel;
@@ -81,7 +80,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="soft-surface p-8 border border-black/5">
+    <div className="soft-surface p-6 border border-black/5">
       <h2 className="text-xl font-bold text-slate-800 mb-6 font-heading tracking-tight">
         Settings
       </h2>
@@ -414,48 +413,31 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         onClick={onGenerate}
         disabled={isLoading}
         aria-busy={isLoading}
-        className={`w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
+        className={`btn-generate w-full py-4 px-4 rounded-xl font-bold text-sm leading-tight text-center transition-all duration-300 group outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
           ${
             isLoading
-              ? "bg-stone-200 text-stone-400 border border-stone-300"
-              : "bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white shadow-[0_4px_14px_0_rgba(180,83,9,0.39)] hover:shadow-[0_6px_20px_rgba(180,83,9,0.23)] hover:-translate-y-[1px] active:translate-y-[1px] border border-amber-500/30"
+              ? "bg-stone-200 text-stone-400 border border-stone-300 cursor-not-allowed"
+              : "bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 text-white shadow-[0_4px_14px_0_rgba(180,83,9,0.39)] hover:shadow-[0_6px_20px_rgba(180,83,9,0.23)] hover:-translate-y-[1px] active:translate-y-[1px] active:shadow-[0_2px_8px_rgba(180,83,9,0.3)] border border-amber-500/30"
           }
         `}
       >
         {/* Shine sweep on hover */}
-        {!isLoading && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out z-0" />
-        )}
+        {!isLoading && <div className="shine" />}
 
         <div className="relative z-10">
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <svg
-                className="animate-spin h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+            <div className="flex items-center justify-center gap-3">
+              <div className="note-bounce flex gap-1 text-base">
+                <span>♩</span>
+                <span>♪</span>
+                <span>♫</span>
+              </div>
               <span>Composing...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
               <svg
-                className="w-5 h-5 shrink-0 transition-transform group-hover:-rotate-12 duration-300"
+                className="w-5 h-5 shrink-0 transition-transform group-hover:-rotate-12 group-hover:scale-110 duration-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -472,14 +454,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           )}
         </div>
       </button>
-
-      <div className="mt-5 text-[10px] font-bold uppercase tracking-widest text-stone-400 text-center flex items-center justify-center gap-2">
-        <span className="w-4 h-[1px] bg-stone-200"></span>
-        {generationMode === "Algorithm"
-          ? "Procedural Generation Engine"
-          : "Google Gemini 2.5 AI"}
-        <span className="w-4 h-[1px] bg-stone-200"></span>
-      </div>
     </div>
   );
 };

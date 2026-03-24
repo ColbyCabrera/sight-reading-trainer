@@ -1,22 +1,9 @@
 import assert from "node:assert";
 import { test, describe } from "node:test";
 import { generateAlgorithmicSheetMusic } from "./algorithmicService.ts";
-import type {
-  DifficultyLevel,
-  MusicalKey,
-  GenerationSettings,
-} from "../types.ts";
+import type { GenerationSettings } from "../types.ts";
 
 describe("generateAlgorithmicSheetMusic", () => {
-  const countMeasuresInVoice = (
-    abcNotation: string,
-    voiceHeader: string,
-  ): number => {
-    const voiceSection =
-      abcNotation.split(`${voiceHeader}\n`)[1]?.split("\nV:")[0] ?? "";
-    return (voiceSection.match(/\|/g) ?? []).length;
-  };
-
   test("should generate a valid exercise for difficulty level 1", () => {
     const result = generateAlgorithmicSheetMusic(1, "C Major");
 

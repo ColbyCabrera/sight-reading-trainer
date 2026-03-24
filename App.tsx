@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
 import { ControlPanel } from "./components/ControlPanel";
 import { ScoreDisplay } from "./components/ScoreDisplay";
-import { generateSheetMusic } from "./services/geminiService";
 import { generateAlgorithmicSheetMusic } from "./services/algorithmicService";
 import {
   SightReadingExercise,
@@ -37,7 +36,7 @@ const App: React.FC = () => {
       setExercise(null);
       setError(null);
       try {
-        let newExercise: SightReadingExercise = generateAlgorithmicSheetMusic(
+        const newExercise: SightReadingExercise = generateAlgorithmicSheetMusic(
           level,
           key,
           currentSettings,

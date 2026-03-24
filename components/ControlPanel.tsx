@@ -3,19 +3,16 @@ import {
   DifficultyLevel,
   LoadingState,
   MusicalKey,
-  GenerationMode,
   GenerationSettings,
 } from "../types";
 
 interface ControlPanelProps {
   difficulty: DifficultyLevel;
   selectedKey: MusicalKey;
-  generationMode: GenerationMode;
   loadingState: LoadingState;
   settings: GenerationSettings;
   onDifficultyChange: (level: DifficultyLevel) => void;
   onKeyChange: (key: MusicalKey) => void;
-  onModeChange: (mode: GenerationMode) => void;
   onSettingsChange: (settings: GenerationSettings) => void;
   onGenerate: () => void;
 }
@@ -69,7 +66,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const isLoading = loadingState === "generating";
   const advancedPanelId = useId();
 
-  // Handler to update a single setting
+  /** Updates one generation setting while preserving the rest. */
   const updateSetting = <K extends keyof GenerationSettings>(
     key: K,
     value: GenerationSettings[K],

@@ -1,6 +1,4 @@
-import React from "react";
-
-export const Header: React.FC = () => {
+export function Header() {
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-black/5 sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
@@ -46,4 +44,4 @@ export const Header: React.FC = () => {
       </div>
     </header>
   );
-};
+}

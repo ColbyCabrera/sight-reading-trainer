@@ -1,11 +1,10 @@
-
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ScoreDisplayProps {
   abcNotation: string;
 }
 
-export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
+export function ScoreDisplay({ abcNotation }: ScoreDisplayProps) {
   const scoreRef = useRef<HTMLDivElement>(null);
   // Refs to keep track of ABCJS instances for cleanup
   const synthControlRef = useRef<any>(null);
@@ -102,4 +101,4 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ abcNotation }) => {
       />
     </div>
   );
-};
+}

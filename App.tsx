@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
 import { ControlPanel } from "./components/ControlPanel";
 import { ScoreDisplay } from "./components/ScoreDisplay";
 import { generateAlgorithmicSheetMusic } from "./services/algorithmicService";
 import {
-  SightReadingExercise,
-  DifficultyLevel,
-  LoadingState,
-  MusicalKey,
-  GenerationSettings,
+  type SightReadingExercise,
+  type DifficultyLevel,
+  type LoadingState,
+  type MusicalKey,
+  type GenerationSettings,
 } from "./types";
 import { getSettingsForLevel } from "./utils/musicTheory";
 
-const App: React.FC = () => {
+function App() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
   const [selectedKey, setSelectedKey] = useState<MusicalKey>("Random");
 
@@ -228,6 +228,6 @@ const App: React.FC = () => {
       </main>
     </div>
   );
-};
+}
 
 export default App;

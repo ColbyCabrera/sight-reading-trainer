@@ -1,9 +1,9 @@
-import React, { useState, useId } from "react";
+import { useId, useState, type ChangeEvent, type CSSProperties } from "react";
 import {
-  DifficultyLevel,
-  LoadingState,
-  MusicalKey,
-  GenerationSettings,
+  type DifficultyLevel,
+  type LoadingState,
+  type MusicalKey,
+  type GenerationSettings,
 } from "../types";
 
 interface ControlPanelProps {
@@ -52,7 +52,7 @@ const KEY_GROUPS: { label: string; keys: MusicalKey[] }[] = [
   },
 ];
 
-export const ControlPanel: React.FC<ControlPanelProps> = ({
+export function ControlPanel({
   difficulty,
   selectedKey,
   loadingState,
@@ -61,7 +61,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onKeyChange,
   onSettingsChange,
   onGenerate,
-}) => {
+}: ControlPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const isLoading = loadingState === "generating";
   const advancedPanelId = useId();
@@ -108,7 +108,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             style={
               {
                 "--fill": `${((difficulty - 1) / 9) * 100}%`,
-              } as React.CSSProperties
+              } as CSSProperties
             }
             disabled={isLoading}
           />
@@ -222,7 +222,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               style={
                 {
                   "--fill": `${((settings.rhythmComplexity - 1) / 9) * 100}%`,
-                } as React.CSSProperties
+                } as CSSProperties
               }
             />
           </div>
@@ -247,14 +247,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               max="1"
               step="0.05"
               value={settings.rhythmVariance}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 updateSetting("rhythmVariance", Number(e.target.value))
               }
               className="range-slider-sm"
               style={
                 {
                   "--fill": `${settings.rhythmVariance * 100}%`,
-                } as React.CSSProperties
+                } as CSSProperties
               }
             />
           </div>
@@ -286,7 +286,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               style={
                 {
                   "--fill": `${((settings.maxInterval - 1) / 11) * 100}%`,
-                } as React.CSSProperties
+                } as CSSProperties
               }
             />
           </div>
@@ -425,4 +425,4 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </button>
     </div>
   );
-};
+}

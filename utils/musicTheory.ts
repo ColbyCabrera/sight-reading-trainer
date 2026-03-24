@@ -552,9 +552,9 @@ export interface InternalDifficultyProfile {
   accidentalsAllowed: boolean;
   chordComplexity: "TRIAD" | "SHELL" | "FULL" | "INVERSION";
   costs: {
-    leapPenalty: number; // Cost added per semitone of leap
+    leapPenalty: number; // Flat cost applied when a melodic move exceeds a fourth
     dissonancePenalty: number; // Cost for non-chord tones on strong beats
-    directionChangeBonus: number; // Bonus for resolving a leap (Gap-Fill)
+    directionChangeBonus: number; // Bonus for resolving a leap by changing direction
     repetitionPenalty: number; // Cost for repeating the same note
   };
 }

@@ -9,12 +9,16 @@ interface ScoreDisplayProps {
   abcNotation: string;
 }
 
+const MIDI_PLAYER_ID = "midi-player";
+const TEMPO_INPUT_ID = "abcjs-tempo-input";
+const TEMPO_INPUT_NAME = "abcjs-tempo";
+
 export function ScoreDisplay({ abcNotation }: ScoreDisplayProps) {
   const scoreRef = useRef<HTMLDivElement>(null);
   const synthControlRef = useRef<AbcjsSynthController | null>(null);
   const createSynthRef = useRef<AbcjsCreateSynth | null>(null);
 
-  const getMidiContainer = () => document.getElementById("midi-player");
+  const getMidiContainer = () => document.getElementById(MIDI_PLAYER_ID);
 
   const clearMidiContainer = () => {
     const midiContainer = getMidiContainer();
@@ -23,11 +27,17 @@ export function ScoreDisplay({ abcNotation }: ScoreDisplayProps) {
     }
   };
 
-  const markTempoInputAccessible = (midiContainer: HTMLElement) => {
+  const ensureTempoInputAccessibility = (midiContainer: HTMLElement) => {
     const tempoInput =
       midiContainer.querySelector<HTMLInputElement>(".abcjs-midi-tempo");
-    if (tempoInput && !tempoInput.id) {
-      tempoInput.id = "abcjs-tempo-input";
+    if (tempoInput) {
+      if (!tempoInput.id) {
+        tempoInput.id = TEMPO_INPUT_ID;
+      }
+
+      if (!tempoInput.name) {
+        tempoInput.name = TEMPO_INPUT_NAME;
+      }
     }
   };
 
@@ -96,7 +106,7 @@ export function ScoreDisplay({ abcNotation }: ScoreDisplayProps) {
       chordsOff: true,
       midiVol: 100,
     });
-    markTempoInputAccessible(midiContainer);
+    ensureTempoInputAccessibility(midiContainer);
   };
 
   useEffect(() => {

@@ -17,6 +17,7 @@ import {
   SCALES,
   RHYTHM_PATTERNS,
 } from "../utils/musicTheory.ts";
+import { getRandomElement, getWeightedRandomElement } from "../utils/random.ts";
 import type {
   CadenceTemplate,
   ProgressionTemplate,
@@ -41,46 +42,6 @@ import type {
  * The result is deterministic only at the structural level; musical variety
  * comes from controlled randomness within the chosen difficulty profile.
  */
-
-// --- HELPERS ---
-/** Returns an integer in the inclusive range [min, max]. */
-const getRandomInt = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-/** Returns a random element from a non-empty array. */
-const getRandomElement = <T>(arr: T[]): T =>
-  arr[Math.floor(Math.random() * arr.length)];
-
-/** Selects one item using positive weights while keeping low-probability items possible. */
-const getWeightedRandomElement = <T>(
-  arr: T[],
-  getWeight: (item: T) => number,
-): T => {
-  if (arr.length === 0) {
-    throw new Error("Cannot select from an empty weighted collection.");
-  }
-
-  const weightedItems = arr.map((item) => ({
-    item,
-    weight: Math.max(0, getWeight(item)),
-  }));
-  const totalWeight = weightedItems.reduce(
-    (sum, entry) => sum + entry.weight,
-    0,
-  );
-
-  if (totalWeight <= 0) {
-    return arr[0];
-  }
-
-  let threshold = Math.random() * totalWeight;
-  for (const entry of weightedItems) {
-    threshold -= entry.weight;
-    if (threshold <= 0) return entry.item;
-  }
-
-  return weightedItems[weightedItems.length - 1].item;
-};
 
 /**
  * Maps the public difficulty level to a smaller set of internal composition
@@ -343,7 +304,9 @@ class HarmonicEngine {
 
   /** Limits melody candidates to the active hand range. */
   private getMelodyCandidates(range: [number, number]): number[] {
-    return this.scaleNotes.filter((note) => note >= range[0] && note <= range[1]);
+    return this.scaleNotes.filter(
+      (note) => note >= range[0] && note <= range[1],
+    );
   }
 
   /** Computes the full weighted cost for one melody candidate. */
@@ -402,7 +365,10 @@ class HarmonicEngine {
   }
 
   /** Rewards direction changes after a leap and penalizes repeating the same leap direction. */
-  private getLeapResolutionCost(interval: number, prevInterval: number): number {
+  private getLeapResolutionCost(
+    interval: number,
+    prevInterval: number,
+  ): number {
     if (Math.abs(prevInterval) <= 4) {
       return 0;
     }
@@ -445,6 +411,8 @@ class HarmonicEngine {
  * to a fully independent accompaniment pattern selected from several styles.
  */
 class AccompanimentGenerator {
+  private static readonly MAX_BASS_REGISTER_PITCH = 55;
+
   private engine: HarmonicEngine;
   constructor(engine: HarmonicEngine) {
     this.engine = engine;
@@ -477,148 +445,260 @@ class AccompanimentGenerator {
       const isFinalMeasure = mIdx === measures - 1;
       let tokens: NoteToken[] = [];
 
-      // STRATEGY: PARALLEL MOTION (Level 2)
       if (settings.handCoordination === "PARALLEL") {
-        const rhMeasure = sourceMeasures[mIdx];
-        rhMeasure.tokens.forEach((t) => {
-          let newPitch: number | number[] = 60;
-          if (Array.isArray(t.pitch)) {
-            newPitch = t.pitch.map((p) => p - 12);
-          } else {
-            newPitch = t.pitch - 12;
-          }
-          tokens.push({ ...t, pitch: newPitch, dynamic: undefined }); // Strip dynamic from LH copy
-        });
+        tokens = this.buildParallelTokens(sourceMeasures[mIdx]);
         lhMeasures.push({ tokens, chordDegree, isStrong: true });
         return;
       }
 
-      // STRATEGY: SEPARATE (Level 1)
       if (settings.handCoordination === "SEPARATE") {
-        const currentHand = handAssignments[mIdx];
-
-        if (currentHand === "RH") {
-          // LH Rests
-          tokens.push({
-            type: "rest",
-            pitch: 0,
-            duration: timeSig === "4/4" ? 4 : 3,
-          });
-        } else {
-          // LH Plays Melody (Source is already generated in correct register for LH)
-          const sourceMeasure = sourceMeasures[mIdx];
-          tokens = [...sourceMeasure.tokens];
-        }
+        tokens = this.buildSeparateTokens(
+          sourceMeasures[mIdx],
+          handAssignments[mIdx],
+          timeSig,
+        );
         lhMeasures.push({ tokens, chordDegree, isStrong: true });
         return;
       }
 
-      // STRATEGY: INDEPENDENT (Level 3+)
+      style = this.resolveIndependentStyle(style, timeSig, isFinalMeasure);
+      const triad = this.getAccompanimentTriad(chordDegree);
+      tokens = this.buildIndependentTokens(
+        style,
+        triad,
+        timeSig,
+        internalProfile,
+      );
 
-      if (style === "MIXED") style = timeSig === "3/4" ? "WALTZ" : "BROKEN";
-      if (style === "NONE") style = "BLOCK"; // Fallback if independent but style is none
-      if (isFinalMeasure) style = "BLOCK";
-
-      // DYNAMIC OCTAVE ADJUSTMENT
-      // Ensure the accompaniment doesn't go too high into treble territory
-      let octave = 3;
-      const keyOffset = this.engine.keyRoot % 12;
-      const basePitch = (octave + 1) * 12 + keyOffset; // e.g., 48 + keyOffset
-      // If base pitch is > 55 (G3), drop an octave to keep LH in proper bass register
-      if (basePitch > 55) octave = 2;
-
-      const triad = this.engine.getChordTones(chordDegree, octave);
-      const [root, third, fifth] = triad;
-
-      switch (style) {
-        case "BLOCK":
-          const notes =
-            internalProfile.chordComplexity === "SHELL"
-              ? [root, fifth]
-              : [root, third, fifth];
-          tokens.push({
-            type: "note",
-            pitch: notes,
-            duration: timeSig === "4/4" ? 4 : 3,
-          });
-          break;
-
-        case "WALTZ":
-          if (timeSig === "3/4") {
-            tokens.push({ type: "note", pitch: root, duration: 1 });
-            tokens.push({ type: "note", pitch: [third, fifth], duration: 1 });
-            tokens.push({ type: "note", pitch: [third, fifth], duration: 1 });
-          } else {
-            tokens.push({
-              type: "note",
-              pitch: [root, third, fifth],
-              duration: 4,
-            });
-          }
-          break;
-
-        case "ALBERTI":
-          if (timeSig === "4/4") {
-            const pattern = [
-              root,
-              fifth,
-              third,
-              fifth,
-              root,
-              fifth,
-              third,
-              fifth,
-            ];
-            pattern.forEach((p) =>
-              tokens.push({ type: "note", pitch: p, duration: 0.5 }),
-            );
-          } else {
-            const pattern = [root, fifth, third, fifth, third, fifth];
-            pattern.forEach((p) =>
-              tokens.push({ type: "note", pitch: p, duration: 0.5 }),
-            );
-          }
-          break;
-
-        case "BROKEN":
-          if (timeSig === "4/4") {
-            tokens.push({ type: "note", pitch: root, duration: 1 });
-            tokens.push({ type: "note", pitch: third, duration: 1 });
-            tokens.push({ type: "note", pitch: fifth, duration: 1 });
-            tokens.push({ type: "note", pitch: root + 12, duration: 1 });
-          } else {
-            tokens.push({ type: "note", pitch: root, duration: 1 });
-            tokens.push({ type: "note", pitch: third, duration: 1 });
-            tokens.push({ type: "note", pitch: fifth, duration: 1 });
-          }
-          break;
-
-        case "STRIDE":
-          const lowRoot = root - 12;
-          const highChord = [third, fifth, root + 12];
-          if (timeSig === "4/4") {
-            tokens.push({ type: "note", pitch: lowRoot, duration: 1 });
-            tokens.push({ type: "note", pitch: highChord, duration: 1 });
-            tokens.push({ type: "note", pitch: fifth - 12, duration: 1 });
-            tokens.push({ type: "note", pitch: highChord, duration: 1 });
-          } else {
-            tokens.push({ type: "note", pitch: lowRoot, duration: 1 });
-            tokens.push({ type: "note", pitch: highChord, duration: 1 });
-            tokens.push({ type: "note", pitch: highChord, duration: 1 });
-          }
-          break;
-
-        default:
-          tokens.push({
-            type: "note",
-            pitch: [root, fifth],
-            duration: timeSig === "4/4" ? 4 : 3,
-          });
-      }
       lhMeasures.push({ tokens, chordDegree, isStrong: true });
     });
 
     return lhMeasures;
+  }
+
+  /** Mirrors the right-hand measure down an octave for locked parallel motion. */
+  private buildParallelTokens(sourceMeasure: Measure): NoteToken[] {
+    return sourceMeasure.tokens.map((token) => ({
+      ...token,
+      pitch: this.shiftPitchDownOctave(token.pitch),
+      dynamic: undefined,
+    }));
+  }
+
+  /** Either rests or reuses the source melody when hands alternate ownership. */
+  private buildSeparateTokens(
+    sourceMeasure: Measure,
+    currentHand: "RH" | "LH",
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    if (currentHand === "LH") {
+      return [...sourceMeasure.tokens];
+    }
+
+    return [
+      {
+        type: "rest",
+        pitch: 0,
+        duration: timeSig === "4/4" ? 4 : 3,
+      },
+    ];
+  }
+
+  /** Normalizes mixed and fallback accompaniment modes to a concrete style. */
+  private resolveIndependentStyle(
+    style: GenerationSettings["accompanimentStyle"][number],
+    timeSig: "4/4" | "3/4",
+    isFinalMeasure: boolean,
+  ): Exclude<
+    GenerationSettings["accompanimentStyle"][number],
+    "MIXED" | "NONE"
+  > {
+    if (isFinalMeasure) {
+      return "BLOCK";
+    }
+
+    if (style === "MIXED") {
+      return timeSig === "3/4" ? "WALTZ" : "BROKEN";
+    }
+
+    if (style === "NONE") {
+      return "BLOCK";
+    }
+
+    return style;
+  }
+
+  /** Keeps the accompaniment triad in a bass-friendly register for the left hand. */
+  private getAccompanimentTriad(chordDegree: number): [number, number, number] {
+    const octave = this.getAccompanimentOctave();
+    return this.engine.getChordTones(chordDegree, octave) as [
+      number,
+      number,
+      number,
+    ];
+  }
+
+  /** Chooses an octave that keeps the generated bass below the treble crossover. */
+  private getAccompanimentOctave(): number {
+    const defaultOctave = 3;
+    const keyOffset = this.engine.keyRoot % 12;
+    const basePitch = (defaultOctave + 1) * 12 + keyOffset;
+
+    return basePitch > AccompanimentGenerator.MAX_BASS_REGISTER_PITCH
+      ? 2
+      : defaultOctave;
+  }
+
+  /** Dispatches independent accompaniment generation to the concrete style helper. */
+  private buildIndependentTokens(
+    style: Exclude<
+      GenerationSettings["accompanimentStyle"][number],
+      "MIXED" | "NONE"
+    >,
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+    profile: InternalDifficultyProfile,
+  ): NoteToken[] {
+    switch (style) {
+      case "BLOCK":
+        return this.buildBlockChordTokens(triad, timeSig, profile);
+      case "WALTZ":
+        return this.buildWaltzTokens(triad, timeSig);
+      case "ALBERTI":
+        return this.buildAlbertiTokens(triad, timeSig);
+      case "BROKEN":
+        return this.buildBrokenChordTokens(triad, timeSig);
+      case "STRIDE":
+        return this.buildStrideTokens(triad, timeSig);
+      default:
+        return this.buildFallbackTokens(triad, timeSig);
+    }
+  }
+
+  /** Builds sustained block or shell chords for the left hand. */
+  private buildBlockChordTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+    profile: InternalDifficultyProfile,
+  ): NoteToken[] {
+    const [root, third, fifth] = triad;
+    const notes =
+      profile.chordComplexity === "SHELL"
+        ? [root, fifth]
+        : [root, third, fifth];
+
+    return [
+      {
+        type: "note",
+        pitch: notes,
+        duration: timeSig === "4/4" ? 4 : 3,
+      },
+    ];
+  }
+
+  /** Builds a waltz bass pattern or falls back to a sustained chord in 4/4. */
+  private buildWaltzTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    const [root, third, fifth] = triad;
+
+    if (timeSig === "3/4") {
+      return [
+        { type: "note", pitch: root, duration: 1 },
+        { type: "note", pitch: [third, fifth], duration: 1 },
+        { type: "note", pitch: [third, fifth], duration: 1 },
+      ];
+    }
+
+    return [{ type: "note", pitch: [root, third, fifth], duration: 4 }];
+  }
+
+  /** Builds the alternating low-high Alberti accompaniment pattern. */
+  private buildAlbertiTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    const [root, third, fifth] = triad;
+    const pattern =
+      timeSig === "4/4"
+        ? [root, fifth, third, fifth, root, fifth, third, fifth]
+        : [root, fifth, third, fifth, third, fifth];
+
+    return pattern.map((pitch) => ({ type: "note", pitch, duration: 0.5 }));
+  }
+
+  /** Builds a simple arpeggiated broken-chord accompaniment. */
+  private buildBrokenChordTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    const [root, third, fifth] = triad;
+
+    if (timeSig === "4/4") {
+      return [
+        { type: "note", pitch: root, duration: 1 },
+        { type: "note", pitch: third, duration: 1 },
+        { type: "note", pitch: fifth, duration: 1 },
+        { type: "note", pitch: root + 12, duration: 1 },
+      ];
+    }
+
+    return [
+      { type: "note", pitch: root, duration: 1 },
+      { type: "note", pitch: third, duration: 1 },
+      { type: "note", pitch: fifth, duration: 1 },
+    ];
+  }
+
+  /** Builds a stride-style bass leap between low single notes and upper chords. */
+  private buildStrideTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    const [root, third, fifth] = triad;
+    const lowRoot = root - 12;
+    const highChord = [third, fifth, root + 12];
+
+    if (timeSig === "4/4") {
+      return [
+        { type: "note", pitch: lowRoot, duration: 1 },
+        { type: "note", pitch: highChord, duration: 1 },
+        { type: "note", pitch: fifth - 12, duration: 1 },
+        { type: "note", pitch: highChord, duration: 1 },
+      ];
+    }
+
+    return [
+      { type: "note", pitch: lowRoot, duration: 1 },
+      { type: "note", pitch: highChord, duration: 1 },
+      { type: "note", pitch: highChord, duration: 1 },
+    ];
+  }
+
+  /** Preserves the existing shell-chord fallback for unexpected style values. */
+  private buildFallbackTokens(
+    triad: [number, number, number],
+    timeSig: "4/4" | "3/4",
+  ): NoteToken[] {
+    const [root, , fifth] = triad;
+
+    return [
+      {
+        type: "note",
+        pitch: [root, fifth],
+        duration: timeSig === "4/4" ? 4 : 3,
+      },
+    ];
+  }
+
+  /** Shifts a copied melody token down one octave for parallel-motion accompaniment. */
+  private shiftPitchDownOctave(pitch: number | number[]): number | number[] {
+    if (Array.isArray(pitch)) {
+      return pitch.map((note) => note - 12);
+    }
+
+    return pitch - 12;
   }
 }
 

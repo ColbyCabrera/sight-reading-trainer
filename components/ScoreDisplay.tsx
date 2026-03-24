@@ -1,4 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
+import type {
+  AbcjsCreateSynth,
+  AbcjsSynthController,
+  AbcjsVisualObject,
+} from "../types";
 
 interface ScoreDisplayProps {
   abcNotation: string;
@@ -6,99 +11,127 @@ interface ScoreDisplayProps {
 
 export function ScoreDisplay({ abcNotation }: ScoreDisplayProps) {
   const scoreRef = useRef<HTMLDivElement>(null);
-  // Refs to keep track of ABCJS instances for cleanup
-  const synthControlRef = useRef<any>(null);
-  const createSynthRef = useRef<any>(null);
+  const synthControlRef = useRef<AbcjsSynthController | null>(null);
+  const createSynthRef = useRef<AbcjsCreateSynth | null>(null);
 
-  useEffect(() => {
-    if (window.ABCJS && scoreRef.current) {
-      // Render Visual
-      const visualObj = window.ABCJS.renderAbc(scoreRef.current, abcNotation, {
-        responsive: 'resize',
-        scale: 1.2,
-        add_classes: true,
-        staffwidth: 740, // Force a reasonable width for readability
-        paddingbottom: 30,
-        paddingtop: 10,
-        paddingright: 20,
-        paddingleft: 20,
-      });
+  const getMidiContainer = () => document.getElementById("midi-player");
 
-      // Render Audio Player if midi element exists
-      // We look for the midi-player element which is in the parent App component
-      const midiContainer = document.getElementById('midi-player');
-      if (midiContainer && window.ABCJS.synth) {
-        if (window.ABCJS.synth.supportsAudio()) {
-          // Clear previous player content to avoid duplicates
-          midiContainer.replaceChildren();
-          const synthControl = new window.ABCJS.synth.SynthController();
-          synthControlRef.current = synthControl;
+  const clearMidiContainer = () => {
+    const midiContainer = getMidiContainer();
+    if (midiContainer) {
+      midiContainer.replaceChildren();
+    }
+  };
 
-          synthControl.load(midiContainer, null, {
-            displayLoop: true,
-            displayRestart: true,
-            displayPlay: true,
-            displayProgress: true,
-            displayWarp: true
-          });
+  const markTempoInputAccessible = (midiContainer: HTMLElement) => {
+    const tempoInput =
+      midiContainer.querySelector<HTMLInputElement>(".abcjs-midi-tempo");
+    if (tempoInput && !tempoInput.id) {
+      tempoInput.id = "abcjs-tempo-input";
+    }
+  };
 
-          const createSynth = new window.ABCJS.synth.CreateSynth();
-          createSynthRef.current = createSynth;
+  const showAudioUnsupportedMessage = (midiContainer: HTMLElement) => {
+    const errorDiv = document.createElement("div");
+    errorDiv.className = "text-xs text-red-400";
+    errorDiv.textContent = "Audio not supported in this browser.";
+    midiContainer.replaceChildren(errorDiv);
+  };
 
-          createSynth.init({ visualObj: visualObj[0] }).then(() => {
-            // chordsOff: true prevents ABCJS from playing chord symbols (C, G7) automatically
-            // if they existed in the text, but we generate notes explicitly so this is safe.
-            return synthControl.setTune(visualObj[0], false, {
-              chordsOff: true,
-              midiVol: 100 // Ensure dynamics are audible
-            }).then(() => {
-              // Fix accessibility error: ABCJS tempo input lacks an id or name
-              const tempoInput = midiContainer.querySelector('.abcjs-midi-tempo');
-              if (tempoInput && !tempoInput.id) {
-                tempoInput.id = 'abcjs-tempo-input';
-              }
-            });
-          }).catch((error: any) => {
-            console.warn("Audio problem:", error);
-          });
-        } else {
-          // Clear previous content and append error message in one step
-          const errorDiv = document.createElement('div');
-          errorDiv.className = 'text-xs text-red-400';
-          errorDiv.textContent = 'Audio not supported in this browser.';
-          midiContainer.replaceChildren(errorDiv);
-        }
+  const cleanupAudio = () => {
+    if (createSynthRef.current) {
+      try {
+        createSynthRef.current.stop();
+      } catch (error) {
+        console.warn("Failed to stop synth:", error);
       }
     }
 
-    // CLEANUP: Stop audio when component unmounts or updates
-    return () => {
-      if (createSynthRef.current) {
-        try {
-          createSynthRef.current.stop();
-        } catch (e) {
-          console.warn("Failed to stop synth:", e);
-        }
+    if (synthControlRef.current) {
+      try {
+        synthControlRef.current.disable(true);
+      } catch (error) {
+        console.warn("Failed to disable synth control:", error);
       }
-      if (synthControlRef.current) {
-        try {
-          synthControlRef.current.disable(true);
-        } catch (e) {
-          console.warn("Failed to disable synth control:", e);
-        }
-      }
-      // Explicitly clear the container to ensure buttons are removed
-      const midiContainer = document.getElementById('midi-player');
-      if (midiContainer) midiContainer.replaceChildren();
-    };
+    }
+
+    createSynthRef.current = null;
+    synthControlRef.current = null;
+    clearMidiContainer();
+  };
+
+  const initializeAudioPlayer = async (
+    midiContainer: HTMLElement,
+    visualObject: AbcjsVisualObject,
+  ) => {
+    const abcjs = window.ABCJS;
+    const synthApi = abcjs?.synth;
+
+    if (!synthApi) {
+      return;
+    }
+
+    if (!synthApi.supportsAudio()) {
+      showAudioUnsupportedMessage(midiContainer);
+      return;
+    }
+
+    midiContainer.replaceChildren();
+    const synthControl = new synthApi.SynthController();
+    const createSynth = new synthApi.CreateSynth();
+
+    synthControlRef.current = synthControl;
+    createSynthRef.current = createSynth;
+
+    synthControl.load(midiContainer, null, {
+      displayLoop: true,
+      displayRestart: true,
+      displayPlay: true,
+      displayProgress: true,
+      displayWarp: true,
+    });
+
+    await createSynth.init({ visualObj: visualObject });
+    await synthControl.setTune(visualObject, false, {
+      chordsOff: true,
+      midiVol: 100,
+    });
+    markTempoInputAccessible(midiContainer);
+  };
+
+  useEffect(() => {
+    const abcjs = window.ABCJS;
+    const scoreElement = scoreRef.current;
+    if (!abcjs || !scoreElement) {
+      return cleanupAudio;
+    }
+
+    const [visualObject] = abcjs.renderAbc(scoreElement, abcNotation, {
+      responsive: "resize",
+      scale: 1.2,
+      add_classes: true,
+      staffwidth: 740,
+      paddingbottom: 30,
+      paddingtop: 10,
+      paddingright: 20,
+      paddingleft: 20,
+    });
+
+    const midiContainer = getMidiContainer();
+    if (midiContainer && visualObject) {
+      initializeAudioPlayer(midiContainer, visualObject).catch(
+        (error: unknown) => {
+          console.warn("Audio problem:", error);
+        },
+      );
+    }
+
+    return cleanupAudio;
   }, [abcNotation]);
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div
-        ref={scoreRef}
-        className="w-full text-center min-h-[300px]"
-      />
+      <div ref={scoreRef} className="w-full text-center min-h-[300px]" />
     </div>
   );
 }

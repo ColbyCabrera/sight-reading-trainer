@@ -121,6 +121,20 @@ const planHandAssignments = (
   return assignments;
 };
 
+/** Formats the resolved hand-coordination mode for the exercise summary. */
+const formatCoordinationLabel = (
+  coordination: Exclude<GenerationSettings["handCoordination"], "RANDOM">,
+): string => `${coordination.charAt(0)}${coordination.slice(1).toLowerCase()}`;
+
+/** Builds the short user-facing description shown alongside the rendered score. */
+const buildExerciseDescription = (
+  coordination: Exclude<GenerationSettings["handCoordination"], "RANDOM">,
+  rhythmComplexity: DifficultyLevel,
+): string =>
+  `${formatCoordinationLabel(
+    coordination,
+  )} Motion - Level ${rhythmComplexity} Rhythm`;
+
 // --- STAGE 2: GENERATORS ---
 /**
  * Produces measure-level rhythm patterns from the pre-defined rhythm library.
@@ -1122,14 +1136,12 @@ export const generateAlgorithmicSheetMusic = (
   );
 
   // 5. GENERATE PARTS
-
-  // FIRST: Generate the Melodic Material (Abstract Source)
-  // This is "Context Aware" - if it's LH turn, we generate specifically for Bass clef range
+  // Generate the source melody first, adapting the target range when melody duty switches hands.
 
   const melodySourceMeasures: Measure[] = [];
-  const rhMeasures: Measure[] = []; // Final RH part
+  const rhMeasures: Measure[] = [];
 
-  // Generate abstract rhythm & pitch stream first
+  // Build the rhythmic skeleton that the melodic solver will populate with pitches.
   const rhRhythms = RhythmGenerator.generate(
     numMeasures,
     timeSignature,
@@ -1179,9 +1191,8 @@ export const generateAlgorithmicSheetMusic = (
     };
     melodySourceMeasures.push(melodyMeasure);
 
-    // Populate RH Part
+    // Derive the rendered right-hand part from the source melody.
     if (effectiveCoordination === "SEPARATE" && activeHand === "LH") {
-      // RH takes a rest here
       rhMeasures.push({
         tokens: [
           { type: "rest", pitch: 0, duration: timeSignature === "4/4" ? 4 : 3 },
@@ -1190,7 +1201,6 @@ export const generateAlgorithmicSheetMusic = (
         isStrong: mIdx % 4 === 0,
       });
     } else {
-      // RH plays the melody (Always true for Independent/Parallel, or if it's RH turn in Separate)
       rhMeasures.push(melodyMeasure);
     }
   });
@@ -1229,10 +1239,10 @@ export const generateAlgorithmicSheetMusic = (
     difficulty,
     key: keyName,
     timeSignature,
-    description: `${
-      effectiveCoordination.charAt(0) +
-      effectiveCoordination.slice(1).toLowerCase()
-    } Motion - Level ${settings.rhythmComplexity} Rhythm`,
+    description: buildExerciseDescription(
+      effectiveCoordination,
+      settings.rhythmComplexity,
+    ),
     abcNotation: AbcEngraver.render(score),
   };
 };

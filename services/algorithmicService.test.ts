@@ -3,6 +3,30 @@ import { test, describe } from "node:test";
 import { generateAlgorithmicSheetMusic } from "./algorithmicService.ts";
 import type { GenerationSettings } from "../types.ts";
 
+const withMockedRandom = <T>(value: number, fn: () => T): T => {
+  const originalRandom = Math.random;
+  Math.random = () => value;
+
+  try {
+    return fn();
+  } finally {
+    Math.random = originalRandom;
+  }
+};
+
+const getVoiceBody = (
+  abcNotation: string,
+  voice: "treble" | "bass",
+): string => {
+  if (voice === "treble") {
+    const match = abcNotation.match(/V:1 clef=treble\n([\s\S]*?)\nV:2 clef=bass\n/);
+    return match?.[1] ?? "";
+  }
+
+  const match = abcNotation.match(/V:2 clef=bass\n([\s\S]*)$/);
+  return match?.[1] ?? "";
+};
+
 describe("generateAlgorithmicSheetMusic", () => {
   test("should generate a valid exercise for difficulty level 1", () => {
     const result = generateAlgorithmicSheetMusic(1, "C Major");
@@ -77,5 +101,68 @@ describe("generateAlgorithmicSheetMusic", () => {
     const result = generateAlgorithmicSheetMusic(3, "A Minor");
     assert.strictEqual(result.key, "A Minor");
     assert.ok(result.abcNotation.includes("K:Am"));
+  });
+
+  test("should alternate rests between hands in separate mode", () => {
+    const customSettings: GenerationSettings = {
+      maxInterval: 2,
+      rhythmComplexity: 1,
+      rhythmVariance: 0,
+      handCoordination: "SEPARATE",
+      accompanimentStyle: ["NONE"],
+      playability: "5-FINGER",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(1, "C Major", customSettings)
+    );
+
+    const trebleVoice = getVoiceBody(result.abcNotation, "treble");
+    const bassVoice = getVoiceBody(result.abcNotation, "bass");
+
+    assert.ok(result.description.includes("Separate Motion"));
+    assert.ok(trebleVoice.includes("z"));
+    assert.ok(bassVoice.includes("z"));
+  });
+
+  test("should mirror the melody without rests in parallel mode", () => {
+    const customSettings: GenerationSettings = {
+      maxInterval: 4,
+      rhythmComplexity: 3,
+      rhythmVariance: 0,
+      handCoordination: "PARALLEL",
+      accompanimentStyle: ["NONE"],
+      playability: "5-FINGER",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(5, "D Major", customSettings)
+    );
+
+    const bassVoice = getVoiceBody(result.abcNotation, "bass");
+
+    assert.ok(result.description.includes("Parallel Motion"));
+    assert.ok(!bassVoice.includes("z"));
+  });
+
+  test("should fall back to block chords when independent mode receives NONE", () => {
+    const customSettings: GenerationSettings = {
+      maxInterval: 5,
+      rhythmComplexity: 3,
+      rhythmVariance: 0,
+      handCoordination: "INDEPENDENT",
+      accompanimentStyle: ["NONE"],
+      playability: "OCTAVE",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(5, "C Major", customSettings)
+    );
+
+    const bassVoice = getVoiceBody(result.abcNotation, "bass");
+
+    assert.ok(result.description.includes("Independent Motion"));
+    assert.ok(bassVoice.includes("["));
+    assert.ok(!bassVoice.includes("z"));
   });
 });

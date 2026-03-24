@@ -60,8 +60,14 @@ const getWeightedRandomElement = <T>(
     throw new Error("Cannot select from an empty weighted collection.");
   }
 
-  const weightedItems = arr.map((item) => ({ item, weight: Math.max(0, getWeight(item)) }));
-  const totalWeight = weightedItems.reduce((sum, entry) => sum + entry.weight, 0);
+  const weightedItems = arr.map((item) => ({
+    item,
+    weight: Math.max(0, getWeight(item)),
+  }));
+  const totalWeight = weightedItems.reduce(
+    (sum, entry) => sum + entry.weight,
+    0,
+  );
 
   if (totalWeight <= 0) {
     return arr[0];
@@ -89,6 +95,69 @@ const getInternalProfile = (
   if (level <= 4) return INTERNAL_PROFILES[3];
   if (level <= 7) return INTERNAL_PROFILES[5];
   return INTERNAL_PROFILES[8];
+};
+
+/** Resolves the randomized coordination option into a concrete composition mode. */
+const resolveHandCoordination = (
+  coordination: GenerationSettings["handCoordination"],
+): Exclude<GenerationSettings["handCoordination"], "RANDOM"> => {
+  if (coordination === "RANDOM") {
+    return Math.random() < 0.5 ? "SEPARATE" : "PARALLEL";
+  }
+
+  return coordination;
+};
+
+/** Restricts early difficulties to a small set of pedagogically safe random keys. */
+const resolveSelectedKey = (
+  difficulty: DifficultyLevel,
+  selectedKey: MusicalKey,
+): MusicalKey => {
+  if (selectedKey !== "Random") {
+    return selectedKey;
+  }
+
+  const validKeys =
+    difficulty <= 2
+      ? ["C Major", "G Major", "F Major", "A Minor"]
+      : Object.keys(KEY_MAP);
+
+  return getRandomElement(validKeys) as MusicalKey;
+};
+
+/**
+ * Plans which hand carries the melody in each measure.
+ *
+ * Separate mode alternates short phrases between hands, while all other modes
+ * keep the melodic source anchored in the right hand so the accompaniment layer
+ * can derive the left-hand material independently.
+ */
+const planHandAssignments = (
+  numMeasures: number,
+  coordination: Exclude<GenerationSettings["handCoordination"], "RANDOM">,
+): ("RH" | "LH")[] => {
+  if (coordination !== "SEPARATE") {
+    return Array.from({ length: numMeasures }, () => "RH");
+  }
+
+  const assignments: ("RH" | "LH")[] = [];
+  let currentHand: "RH" | "LH" = "RH";
+  let barsRemainingInPhrase = 0;
+
+  for (let index = 0; index < numMeasures; index++) {
+    if (barsRemainingInPhrase === 0) {
+      if (index > 0) {
+        currentHand = currentHand === "RH" ? "LH" : "RH";
+      }
+
+      barsRemainingInPhrase = Math.random() > 0.5 ? 4 : 2;
+    }
+
+    assignments.push(currentHand);
+    barsRemainingInPhrase--;
+  }
+
+  return assignments;
 };
 
 // --- STAGE 2: GENERATORS ---
@@ -559,46 +628,10 @@ class AbcEngraver {
 
         measure.tokens.forEach((token) => {
           if (token.type === "rest") {
-            // Render rest
-            let durStr = "";
-            if (token.duration === 4) durStr = "4";
-            else if (token.duration === 3) durStr = "3";
-            else if (token.duration === 2) durStr = "2";
-            else if (token.duration === 1) durStr = "";
-
-            partString += "z" + durStr;
+            partString += AbcEngraver.renderRestToken(token);
             currentBeat += token.duration;
           } else {
-            // Render dynamic if present
-            if (token.dynamic) {
-              partString += `!${token.dynamic}!`;
-            }
-
-            // Render note
-            let noteName = "";
-            if (Array.isArray(token.pitch)) {
-              const sorted = [...token.pitch].sort((a, b) => a - b);
-              const abcNotes = sorted.map((p) =>
-                AbcEngraver.midiToAbcToken(p, score.key),
-              );
-              noteName = `[${abcNotes.join("")}]`;
-            } else {
-              noteName = AbcEngraver.midiToAbcToken(
-                token.pitch as number,
-                score.key,
-              );
-            }
-
-            let durStr = "";
-            if (Math.abs(token.duration - 0.75) < 1e-6) durStr = "3/4";
-            else if (token.duration === 0.5) durStr = "/2";
-            else if (token.duration === 0.25) durStr = "/4";
-            else if (token.duration === 1.5) durStr = "3/2";
-            else if (token.duration === 2) durStr = "2";
-            else if (token.duration === 3) durStr = "3";
-            else if (token.duration === 4) durStr = "4";
-
-            partString += noteName + durStr;
+            partString += AbcEngraver.renderNoteToken(token, score.key);
             currentBeat += token.duration;
           }
 
@@ -606,14 +639,63 @@ class AbcEngraver {
         });
 
         partString += mIdx === part.measures.length - 1 ? "|]" : "| ";
-        if ((mIdx + 1) % 4 === 0 && mIdx !== part.measures.length - 1)
+        if ((mIdx + 1) % 4 === 0 && mIdx !== part.measures.length - 1) {
           partString += "\n";
+        }
       });
 
       abc += partString + "\n";
     });
 
     return abc;
+  }
+
+  /** Renders a rest token with the ABC duration suffix expected by the score. */
+  private static renderRestToken(token: NoteToken): string {
+    return `z${this.getRestDurationSuffix(token.duration)}`;
+  }
+
+  /** Renders a note or chord token including any prefixed dynamic markings. */
+  private static renderNoteToken(token: NoteToken, keyName: string): string {
+    const dynamicPrefix = token.dynamic ? `!${token.dynamic}!` : "";
+    return `${dynamicPrefix}${this.renderPitchToken(
+      token.pitch,
+      keyName,
+    )}${this.getDurationSuffix(token.duration)}`;
+  }
+
+  /** Renders either a single pitch or a chord into ABC note syntax. */
+  private static renderPitchToken(
+    pitch: NoteToken["pitch"],
+    keyName: string,
+  ): string {
+    if (Array.isArray(pitch)) {
+      const sorted = [...pitch].sort((a, b) => a - b);
+      const abcNotes = sorted.map((note) => this.midiToAbcToken(note, keyName));
+      return `[${abcNotes.join("")}]`;
+    }
+
+    return this.midiToAbcToken(pitch, keyName);
+  }
+
+  /** Maps note durations to the ABC suffixes used for notes and chords. */
+  private static getDurationSuffix(duration: number): string {
+    if (Math.abs(duration - 0.75) < 1e-6) return "3/4";
+    if (duration === 0.5) return "/2";
+    if (duration === 0.25) return "/4";
+    if (duration === 1.5) return "3/2";
+    if (duration === 2) return "2";
+    if (duration === 3) return "3";
+    if (duration === 4) return "4";
+    return "";
+  }
+
+  /** Restricts rest rendering to the whole-beat values currently emitted upstream. */
+  private static getRestDurationSuffix(duration: number): string {
+    if (duration === 2) return "2";
+    if (duration === 3) return "3";
+    if (duration === 4) return "4";
+    return "";
   }
 
   /**
@@ -689,21 +771,8 @@ class AbcEngraver {
   private static midiToAbcToken(midi: number, keyName: string): string {
     const pc = midi % 12;
 
-    // Memoize both diatonic maps per key to avoid recalculating and reallocating.
-    if (!this.diatonicCache[keyName]) {
-      const forwardMap = this.getDiatonicPitchClasses(keyName);
-      const reverseMap: Record<number, string> = {};
-      for (const noteName in forwardMap) {
-        reverseMap[forwardMap[noteName]] = noteName;
-      }
-      this.diatonicCache[keyName] = {
-        forward: forwardMap,
-        reverse: reverseMap,
-      };
-    }
-
     const { forward: diatonicMap, reverse: reverseDiatonicMap } =
-      this.diatonicCache[keyName];
+      this.getDiatonicMaps(keyName);
     const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
 
     let matchedLetter = reverseDiatonicMap[pc];
@@ -712,78 +781,129 @@ class AbcEngraver {
     let accShift = 0;
 
     if (!baseLetter) {
-      let isRaisedMinor = false;
-
-      // Check if this note is the raised 6th or 7th in a minor key
-      if (keyData.type === "MINOR") {
-        const rootPC = keyData.root % 12;
-        const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
-        const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
-        if (pc === raised6th || pc === raised7th) {
-          isRaisedMinor = true;
-        }
-      }
-
-      const naturalMatch = this.standardReverseMap[pc];
-
-      // We only apply a natural match immediately if it is NOT a raised minor degree
-      // that should be forced to be spelled as a sharp.
-      if (naturalMatch && diatonicMap[naturalMatch] !== pc && !isRaisedMinor) {
-        acc = "=";
-        baseLetter = naturalMatch;
-        accShift = 0;
-      } else {
-        let useFlats = (keyData.flats || 0) > 0;
-
-        // Override for raised minor 6th/7th
-        if (isRaisedMinor) {
-          useFlats = false;
-        }
-
-        if (useFlats) {
-          const nextPC = (pc + 1) % 12;
-          const nextLetter = this.standardReverseMap[nextPC];
-          if (nextLetter) {
-            acc = "_";
-            baseLetter = nextLetter;
-            accShift = -1;
-          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
-            acc = "=";
-            baseLetter = naturalMatch;
-            accShift = 0;
-          }
-        } else {
-          const prevPC = (pc - 1 + 12) % 12;
-          const prevLetter = this.standardReverseMap[prevPC];
-          if (prevLetter) {
-            acc = "^";
-            baseLetter = prevLetter;
-            accShift = 1;
-          } else if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
-            acc = "=";
-            baseLetter = naturalMatch;
-            accShift = 0;
-          }
-        }
-      }
+      ({ acc, baseLetter, accShift } = this.resolveChromaticSpelling(
+        pc,
+        diatonicMap,
+        keyName,
+      ));
     }
 
     if (!baseLetter) baseLetter = "C";
-    const baseMidi = midi - accShift;
-    const octave = Math.floor(baseMidi / 12) - 1;
-    let abcStr = baseLetter!;
-    if (octave === 2) {
-      abcStr = abcStr + ",,";
-    } else if (octave === 3) {
-      abcStr = abcStr + ",";
-    } else if (octave === 4) {
-      abcStr = abcStr;
-    } else if (octave === 5) {
-      abcStr = abcStr.toLowerCase();
-    } else if (octave === 6) {
-      abcStr = abcStr.toLowerCase() + "'";
+    return acc + this.renderOctave(baseLetter, midi - accShift);
+  }
+
+  /** Returns cached diatonic spelling maps for the requested key signature. */
+  private static getDiatonicMaps(keyName: string): {
+    forward: Record<string, number>;
+    reverse: Record<number, string>;
+  } {
+    if (!this.diatonicCache[keyName]) {
+      const forwardMap = this.getDiatonicPitchClasses(keyName);
+      this.diatonicCache[keyName] = {
+        forward: forwardMap,
+        reverse: this.createReversePitchClassMap(forwardMap),
+      };
     }
-    return acc + abcStr;
+
+    return this.diatonicCache[keyName];
+  }
+
+  /** Inverts the per-letter pitch-class map so chromatic lookup can stay O(1). */
+  private static createReversePitchClassMap(
+    forwardMap: Record<string, number>,
+  ): Record<number, string> {
+    const reverseMap: Record<number, string> = {};
+    for (const noteName in forwardMap) {
+      reverseMap[forwardMap[noteName]] = noteName;
+    }
+    return reverseMap;
+  }
+
+  /** Detects the raised sixth and seventh scale degrees used in minor-key spelling. */
+  private static isRaisedMinorPitchClass(pc: number, keyName: string): boolean {
+    const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
+    if (keyData.type !== "MINOR") {
+      return false;
+    }
+
+    const rootPC = keyData.root % 12;
+    const raised6th = (rootPC + SCALES.MAJOR[5]) % 12;
+    const raised7th = (rootPC + SCALES.MAJOR[6]) % 12;
+    return pc === raised6th || pc === raised7th;
+  }
+
+  /** Chooses accidental spelling for pitch classes outside the key's diatonic map. */
+  private static resolveChromaticSpelling(
+    pc: number,
+    diatonicMap: Record<string, number>,
+    keyName: string,
+  ): { acc: string; baseLetter?: string; accShift: number } {
+    const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
+    const naturalMatch = this.standardReverseMap[pc];
+    const isRaisedMinor = this.isRaisedMinorPitchClass(pc, keyName);
+
+    if (naturalMatch && diatonicMap[naturalMatch] !== pc && !isRaisedMinor) {
+      return { acc: "=", baseLetter: naturalMatch, accShift: 0 };
+    }
+
+    if ((keyData.flats || 0) > 0 && !isRaisedMinor) {
+      return this.resolveFlatSpelling(pc, diatonicMap, naturalMatch);
+    }
+
+    return this.resolveSharpSpelling(pc, diatonicMap, naturalMatch);
+  }
+
+  /** Prefers flat spellings in flat keys when a pitch is not already diatonic. */
+  private static resolveFlatSpelling(
+    pc: number,
+    diatonicMap: Record<string, number>,
+    naturalMatch?: string,
+  ): { acc: string; baseLetter?: string; accShift: number } {
+    const nextPC = (pc + 1) % 12;
+    const nextLetter = this.standardReverseMap[nextPC];
+
+    if (nextLetter) {
+      return { acc: "_", baseLetter: nextLetter, accShift: -1 };
+    }
+
+    if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+      return { acc: "=", baseLetter: naturalMatch, accShift: 0 };
+    }
+
+    return { acc: "", accShift: 0 };
+  }
+
+  /** Prefers sharp spellings in sharp keys and for raised minor inflections. */
+  private static resolveSharpSpelling(
+    pc: number,
+    diatonicMap: Record<string, number>,
+    naturalMatch?: string,
+  ): { acc: string; baseLetter?: string; accShift: number } {
+    const prevPC = (pc - 1 + 12) % 12;
+    const prevLetter = this.standardReverseMap[prevPC];
+
+    if (prevLetter) {
+      return { acc: "^", baseLetter: prevLetter, accShift: 1 };
+    }
+
+    if (naturalMatch && diatonicMap[naturalMatch] !== pc) {
+      return { acc: "=", baseLetter: naturalMatch, accShift: 0 };
+    }
+
+    return { acc: "", accShift: 0 };
+  }
+
+  /** Formats octave markers according to ABC pitch casing rules. */
+  private static renderOctave(baseLetter: string, baseMidi: number): string {
+    const octave = Math.floor(baseMidi / 12) - 1;
+
+    if (octave === 2) return `${baseLetter},,`;
+    if (octave === 3) return `${baseLetter},`;
+    if (octave === 4) return baseLetter;
+    if (octave === 5) return baseLetter.toLowerCase();
+    if (octave === 6) return `${baseLetter.toLowerCase()}'`;
+
+    return baseLetter;
   }
 }
 
@@ -804,24 +924,11 @@ export const generateAlgorithmicSheetMusic = (
 ): SightReadingExercise => {
   // 1. CONFIGURATION
   const settings = customSettings || getSettingsForLevel(difficulty);
-
-  // Resolve RANDOM coordination
-  let effectiveCoordination = settings.handCoordination;
-  if (effectiveCoordination === "RANDOM") {
-    effectiveCoordination = Math.random() < 0.5 ? "SEPARATE" : "PARALLEL";
-  }
-
+  const effectiveCoordination = resolveHandCoordination(
+    settings.handCoordination,
+  );
   const internalProfile = getInternalProfile(difficulty);
-
-  let keyName = selectedKey;
-  if (keyName === "Random") {
-    const validKeys =
-      difficulty <= 2
-        ? ["C Major", "G Major", "F Major", "A Minor"]
-        : Object.keys(KEY_MAP);
-    keyName = getRandomElement(validKeys) as MusicalKey;
-  }
-
+  const keyName = resolveSelectedKey(difficulty, selectedKey);
   const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
   const timeSignature = difficulty >= 3 && Math.random() > 0.6 ? "3/4" : "4/4";
   const numMeasures = difficulty <= 2 ? 8 : 16;
@@ -860,34 +967,10 @@ export const generateAlgorithmicSheetMusic = (
   const accompanimentGen = new AccompanimentGenerator(harmonicEngine);
 
   // 4. PLAN HAND ASSIGNMENTS
-  // Determine which hand plays the melody (relevant for Separate, Parallel, Independent)
-  const handAssignments: ("RH" | "LH")[] = [];
-
-  if (effectiveCoordination === "SEPARATE") {
-    // In Separate mode, we alternate who has the melody, the other hand rests.
-    let currentHand: "RH" | "LH" = "RH"; // Start with RH usually
-    let barsRemainingInPhrase = 0;
-
-    for (let i = 0; i < numMeasures; i++) {
-      if (barsRemainingInPhrase === 0) {
-        if (i > 0) {
-          // Switch hands
-          currentHand = currentHand === "RH" ? "LH" : "RH";
-        }
-        // Choose length: 2 or 4 bars
-        const nextPhraseLen = Math.random() > 0.5 ? 4 : 2;
-        barsRemainingInPhrase = nextPhraseLen;
-      }
-      handAssignments.push(currentHand);
-      barsRemainingInPhrase--;
-    }
-  } else {
-    // For INDEPENDENT, PARALLEL, etc., the "Melody" generator should strictly target the Right Hand range.
-    // The Accompaniment generator will handle the Left Hand.
-    for (let i = 0; i < numMeasures; i++) {
-      handAssignments.push("RH");
-    }
-  }
+  const handAssignments = planHandAssignments(
+    numMeasures,
+    effectiveCoordination,
+  );
 
   // 5. GENERATE PARTS
 

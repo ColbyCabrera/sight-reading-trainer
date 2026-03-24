@@ -315,9 +315,7 @@ class HarmonicEngine {
     range: [number, number],
     isStrongBeat: boolean,
   ): number {
-    const candidates = this.scaleNotes.filter(
-      (n) => n >= range[0] && n <= range[1],
-    );
+    const candidates = this.getMelodyCandidates(range);
     if (candidates.length === 0) return prevPitch;
 
     let bestNote = candidates[0];
@@ -326,33 +324,13 @@ class HarmonicEngine {
     const chordTones = this.getChordTones(currentMeasureChord, 4);
 
     for (const candidate of candidates) {
-      let cost = 0;
-      const interval = candidate - prevPitch;
-      const absInterval = Math.abs(interval);
-
-      // Use User Setting for Max Interval
-      if (absInterval > this.settings.maxInterval) cost += 1000;
-      cost += absInterval * 1.5;
-
-      if (absInterval > 4) cost += this.profile.costs.leapPenalty;
-
-      const isChordTone = chordTones.some((ct) => ct % 12 === candidate % 12);
-
-      if (isStrongBeat && !isChordTone) {
-        cost += this.profile.costs.dissonancePenalty;
-      }
-
-      if (Math.abs(prevInterval) > 4) {
-        if (Math.sign(interval) === Math.sign(prevInterval)) {
-          cost += 200;
-        } else {
-          cost -= this.profile.costs.directionChangeBonus;
-        }
-      }
-
-      if (absInterval === 0) cost += this.profile.costs.repetitionPenalty;
-
-      cost += Math.random() * 10;
+      const cost = this.calculateMelodyCandidateCost(
+        candidate,
+        prevPitch,
+        prevInterval,
+        chordTones,
+        isStrongBeat,
+      );
 
       if (cost < minCost) {
         minCost = cost;
@@ -360,12 +338,103 @@ class HarmonicEngine {
       }
     }
 
-    if (this.keyType === "MINOR" && currentMeasureChord === 4) {
-      const semitoneFromRoot = (bestNote - this.keyRoot + 1200) % 12;
-      if (semitoneFromRoot === 10) bestNote += 1;
+    return this.applyMinorDominantAdjustment(bestNote, currentMeasureChord);
+  }
+
+  /** Limits melody candidates to the active hand range. */
+  private getMelodyCandidates(range: [number, number]): number[] {
+    return this.scaleNotes.filter((note) => note >= range[0] && note <= range[1]);
+  }
+
+  /** Computes the full weighted cost for one melody candidate. */
+  private calculateMelodyCandidateCost(
+    candidate: number,
+    prevPitch: number,
+    prevInterval: number,
+    chordTones: number[],
+    isStrongBeat: boolean,
+  ): number {
+    const interval = candidate - prevPitch;
+    const absInterval = Math.abs(interval);
+
+    let cost = 0;
+    cost += this.getIntervalRangeCost(absInterval);
+    cost += this.getLeapCost(absInterval);
+    cost += this.getChordToneCost(candidate, chordTones, isStrongBeat);
+    cost += this.getLeapResolutionCost(interval, prevInterval);
+    cost += this.getRepetitionCost(absInterval);
+    cost += this.getTieBreakerCost();
+
+    return cost;
+  }
+
+  /** Penalizes large intervals and hard-rejects notes outside the configured maximum leap. */
+  private getIntervalRangeCost(absInterval: number): number {
+    let cost = absInterval * 1.5;
+
+    if (absInterval > this.settings.maxInterval) {
+      cost += 1000;
     }
 
-    return bestNote;
+    return cost;
+  }
+
+  /** Applies the profile leap penalty once a melodic move exceeds a fourth. */
+  private getLeapCost(absInterval: number): number {
+    return absInterval > 4 ? this.profile.costs.leapPenalty : 0;
+  }
+
+  /** Prefers chord tones on strong beats to keep the melody harmonically grounded. */
+  private getChordToneCost(
+    candidate: number,
+    chordTones: number[],
+    isStrongBeat: boolean,
+  ): number {
+    if (!isStrongBeat) {
+      return 0;
+    }
+
+    const isChordTone = chordTones.some(
+      (chordTone) => chordTone % 12 === candidate % 12,
+    );
+
+    return isChordTone ? 0 : this.profile.costs.dissonancePenalty;
+  }
+
+  /** Rewards direction changes after a leap and penalizes repeating the same leap direction. */
+  private getLeapResolutionCost(interval: number, prevInterval: number): number {
+    if (Math.abs(prevInterval) <= 4) {
+      return 0;
+    }
+
+    if (Math.sign(interval) === Math.sign(prevInterval)) {
+      return 200;
+    }
+
+    return -this.profile.costs.directionChangeBonus;
+  }
+
+  /** Discourages immediate note repetition when other options are available. */
+  private getRepetitionCost(absInterval: number): number {
+    return absInterval === 0 ? this.profile.costs.repetitionPenalty : 0;
+  }
+
+  /** Adds a small random offset so tied costs do not always pick the same note. */
+  private getTieBreakerCost(): number {
+    return Math.random() * 10;
+  }
+
+  /** Raises the subtonic to the leading tone over minor-key dominant harmony. */
+  private applyMinorDominantAdjustment(
+    note: number,
+    currentMeasureChord: number,
+  ): number {
+    if (this.keyType !== "MINOR" || currentMeasureChord !== 4) {
+      return note;
+    }
+
+    const semitoneFromRoot = (note - this.keyRoot + 1200) % 12;
+    return semitoneFromRoot === 10 ? note + 1 : note;
   }
 }
 

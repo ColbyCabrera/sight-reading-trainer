@@ -63,7 +63,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   settings,
   onDifficultyChange,
   onKeyChange,
-  onModeChange,
   onSettingsChange,
   onGenerate,
 }) => {
@@ -84,30 +83,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <h2 className="text-xl font-bold text-slate-800 mb-6 font-heading tracking-tight">
         Settings
       </h2>
-
-      {/* Mode Selection */}
-      <div className="mb-8 soft-element p-1.5 flex gap-1 bg-stone-100/50">
-        <button
-          onClick={() => onModeChange("AI")}
-          className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-bold transition-smooth ${
-            generationMode === "AI"
-              ? "bg-white text-amber-700 shadow-sm border border-[#E8DEC1]"
-              : "text-stone-500 hover:text-stone-700 hover:bg-stone-200/50"
-          }`}
-        >
-          Gemini AI
-        </button>
-        <button
-          onClick={() => onModeChange("Algorithm")}
-          className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-bold transition-smooth ${
-            generationMode === "Algorithm"
-              ? "bg-white text-amber-700 shadow-sm border border-[#E8DEC1]"
-              : "text-stone-500 hover:text-stone-700 hover:bg-stone-200/50"
-          }`}
-        >
-          Algorithm
-        </button>
-      </div>
 
       <div className="mb-8">
         <div className="flex justify-between items-end mb-3">

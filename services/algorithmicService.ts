@@ -5,15 +5,21 @@ import type {
   GenerationSettings,
 } from "../types.ts";
 import {
+  buildCadencedProgression,
+  getCadenceWeight,
+  getEligibleCadences,
+  getEligibleProgressions,
   INTERNAL_PROFILES,
+  getProgressionWeight,
   getSettingsForLevel,
   KEY_MAP,
   NOTES,
-  PROGRESSIONS,
   SCALES,
   RHYTHM_PATTERNS,
 } from "../utils/musicTheory.ts";
 import type {
+  CadenceTemplate,
+  ProgressionTemplate,
   ScoreStructure,
   Measure,
   NoteToken,
@@ -44,6 +50,31 @@ const getRandomInt = (min: number, max: number) =>
 /** Returns a random element from a non-empty array. */
 const getRandomElement = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
+
+/** Selects one item using positive weights while keeping low-probability items possible. */
+const getWeightedRandomElement = <T>(
+  arr: T[],
+  getWeight: (item: T) => number,
+): T => {
+  if (arr.length === 0) {
+    throw new Error("Cannot select from an empty weighted collection.");
+  }
+
+  const weightedItems = arr.map((item) => ({ item, weight: Math.max(0, getWeight(item)) }));
+  const totalWeight = weightedItems.reduce((sum, entry) => sum + entry.weight, 0);
+
+  if (totalWeight <= 0) {
+    return arr[0];
+  }
+
+  let threshold = Math.random() * totalWeight;
+  for (const entry of weightedItems) {
+    threshold -= entry.weight;
+    if (threshold <= 0) return entry.item;
+  }
+
+  return weightedItems[weightedItems.length - 1].item;
+};
 
 /**
  * Maps the public difficulty level to a smaller set of internal composition
@@ -797,14 +828,27 @@ export const generateAlgorithmicSheetMusic = (
   const tempo = difficulty > 5 ? 110 : 80;
 
   // 2. HARMONIC SKELETON
-  const progTemplate =
-    keyData.type === "MINOR" ? PROGRESSIONS.MINOR_SAD : PROGRESSIONS.BASIC;
-  const chordProgression: number[] = [];
-  for (let i = 0; i < numMeasures; i++) {
-    if (i === numMeasures - 1) chordProgression.push(0);
-    else if (i === numMeasures - 2) chordProgression.push(4);
-    else chordProgression.push(progTemplate[i % progTemplate.length]);
-  }
+  const progressionOptions = getEligibleProgressions(keyData.type, difficulty);
+  const selectedProgression = getWeightedRandomElement<ProgressionTemplate>(
+    progressionOptions,
+    (progression) => getProgressionWeight(progression, difficulty),
+  );
+
+  const cadenceOptions = getEligibleCadences(
+    keyData.type,
+    difficulty,
+    selectedProgression.cadenceFamilies,
+  );
+  const selectedCadence = getWeightedRandomElement<CadenceTemplate>(
+    cadenceOptions,
+    (cadence) => getCadenceWeight(cadence, difficulty),
+  );
+
+  const chordProgression = buildCadencedProgression(
+    selectedProgression,
+    selectedCadence,
+    numMeasures,
+  );
 
   // 3. INSTANTIATE GENERATORS
   const harmonicEngine = new HarmonicEngine(

@@ -48,15 +48,257 @@ export const SCALES = {
   MINOR_HARMONIC: [0, 2, 3, 5, 7, 8, 11],
 };
 
+export type KeySonority = 'MAJOR' | 'MINOR';
+export type ProgressionSonority = KeySonority | 'BOTH';
+export type CadenceFamily = 'AUTHENTIC' | 'PLAGAL' | 'HALF' | 'DECEPTIVE';
+
+export interface ProgressionTemplate {
+  id: string;
+  degrees: number[];
+  sonority: ProgressionSonority;
+  complexity: DifficultyLevel;
+  cadenceFamilies: CadenceFamily[];
+}
+
+export interface CadenceTemplate {
+  id: string;
+  degrees: number[];
+  sonority: ProgressionSonority;
+  family: CadenceFamily;
+  minDifficulty: DifficultyLevel;
+  maxDifficulty?: DifficultyLevel;
+  weight: number;
+}
+
 // Chord Progressions (0-indexed degrees)
-export const PROGRESSIONS = {
-  BASIC: [0, 3, 4, 0], // I - IV - V - I
-  POP: [0, 4, 5, 3],   // I - V - vi - IV
-  CLASSICAL: [0, 3, 0, 4, 0], // I - IV - I - V - I
-  MINOR_SAD: [0, 3, 4, 0], // i - iv - V - i
-  CIRCLE: [0, 3, 6, 2, 5, 1, 4, 0], // Circle of 5ths segment
-  ASCENDING: [0, 1, 2, 3, 4, 4, 0], // Stepwise bass
-  PACHELBEL: [0, 4, 5, 2, 3, 0, 3, 4], // Canon-esque
+export const PROGRESSION_TEMPLATES: readonly ProgressionTemplate[] = [
+  {
+    id: 'BASIC',
+    degrees: [0, 3, 4, 0],
+    sonority: 'BOTH',
+    complexity: 1,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'CLASSICAL',
+    degrees: [0, 3, 0, 4, 0],
+    sonority: 'BOTH',
+    complexity: 2,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'SUBDOM_PREP',
+    degrees: [0, 3, 1, 4],
+    sonority: 'MAJOR',
+    complexity: 2,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'NEIGHBOR_BASS',
+    degrees: [0, 1, 3, 4],
+    sonority: 'BOTH',
+    complexity: 2,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'POP',
+    degrees: [0, 4, 5, 3],
+    sonority: 'MAJOR',
+    complexity: 3,
+    cadenceFamilies: ['AUTHENTIC', 'HALF', 'DECEPTIVE'],
+  },
+  {
+    id: 'TURNAROUND',
+    degrees: [0, 5, 1, 4],
+    sonority: 'MAJOR',
+    complexity: 3,
+    cadenceFamilies: ['AUTHENTIC', 'HALF', 'DECEPTIVE'],
+  },
+  {
+    id: 'MINOR_SAD',
+    degrees: [0, 5, 3, 4],
+    sonority: 'MINOR',
+    complexity: 2,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'MINOR_PLAGAL',
+    degrees: [0, 3, 0, 4],
+    sonority: 'MINOR',
+    complexity: 2,
+    cadenceFamilies: ['AUTHENTIC', 'PLAGAL', 'HALF'],
+  },
+  {
+    id: 'MINOR_TURNAROUND',
+    degrees: [0, 5, 2, 4],
+    sonority: 'MINOR',
+    complexity: 3,
+    cadenceFamilies: ['AUTHENTIC', 'HALF', 'DECEPTIVE'],
+  },
+  {
+    id: 'PACHELBEL',
+    degrees: [0, 4, 5, 2, 3, 0, 3, 4],
+    sonority: 'MAJOR',
+    complexity: 4,
+    cadenceFamilies: ['AUTHENTIC', 'HALF'],
+  },
+  {
+    id: 'ASCENDING',
+    degrees: [0, 1, 2, 3, 4, 4, 0],
+    sonority: 'BOTH',
+    complexity: 4,
+    cadenceFamilies: ['AUTHENTIC', 'HALF'],
+  },
+  {
+    id: 'ANDALUSIAN',
+    degrees: [0, 6, 5, 4],
+    sonority: 'MINOR',
+    complexity: 4,
+    cadenceFamilies: ['AUTHENTIC', 'HALF'],
+  },
+  {
+    id: 'CIRCLE',
+    degrees: [0, 3, 6, 2, 5, 1, 4, 0],
+    sonority: 'BOTH',
+    complexity: 5,
+    cadenceFamilies: ['AUTHENTIC', 'HALF'],
+  },
+];
+
+export const PROGRESSIONS = Object.fromEntries(
+  PROGRESSION_TEMPLATES.map((template) => [template.id, template.degrees]),
+) as Record<string, number[]>;
+
+export const CADENCE_TEMPLATES: readonly CadenceTemplate[] = [
+  {
+    id: 'AUTHENTIC',
+    degrees: [4, 0],
+    sonority: 'BOTH',
+    family: 'AUTHENTIC',
+    minDifficulty: 1,
+    weight: 10,
+  },
+  {
+    id: 'PLAGAL',
+    degrees: [3, 0],
+    sonority: 'BOTH',
+    family: 'PLAGAL',
+    minDifficulty: 1,
+    weight: 4,
+  },
+  {
+    id: 'HALF_OPEN',
+    degrees: [0, 4],
+    sonority: 'BOTH',
+    family: 'HALF',
+    minDifficulty: 2,
+    weight: 3,
+  },
+  {
+    id: 'HALF_PREDOM',
+    degrees: [1, 4],
+    sonority: 'MAJOR',
+    family: 'HALF',
+    minDifficulty: 4,
+    weight: 2,
+  },
+  {
+    id: 'HALF_MINOR_PREDOM',
+    degrees: [3, 4],
+    sonority: 'MINOR',
+    family: 'HALF',
+    minDifficulty: 2,
+    weight: 4,
+  },
+  {
+    id: 'DECEPTIVE',
+    degrees: [4, 5],
+    sonority: 'BOTH',
+    family: 'DECEPTIVE',
+    minDifficulty: 5,
+    weight: 2,
+  },
+];
+
+export const isCompatibleWithSonority = (
+  sonority: ProgressionSonority,
+  keyType: KeySonority,
+): boolean => sonority === 'BOTH' || sonority === keyType;
+
+export const getProgressionWeight = (
+  progression: ProgressionTemplate,
+  difficulty: DifficultyLevel,
+): number => {
+  const complexityGap = progression.complexity - difficulty;
+
+  if (complexityGap <= -2) return 12;
+  if (complexityGap === -1) return 10;
+  if (complexityGap === 0) return 8;
+  if (complexityGap === 1) return 4;
+  if (complexityGap === 2) return 2;
+  return 1;
+};
+
+export const getCadenceWeight = (
+  cadence: CadenceTemplate,
+  difficulty: DifficultyLevel,
+): number => {
+  if (difficulty < cadence.minDifficulty) return 0;
+  if (cadence.maxDifficulty !== undefined && difficulty > cadence.maxDifficulty) {
+    return 0;
+  }
+
+  return cadence.weight + Math.min(3, difficulty - cadence.minDifficulty);
+};
+
+export const getEligibleProgressions = (
+  keyType: KeySonority,
+  difficulty: DifficultyLevel,
+): ProgressionTemplate[] => PROGRESSION_TEMPLATES.filter(
+  (progression) =>
+    isCompatibleWithSonority(progression.sonority, keyType) &&
+    getProgressionWeight(progression, difficulty) > 0,
+);
+
+export const getEligibleCadences = (
+  keyType: KeySonority,
+  difficulty: DifficultyLevel,
+  cadenceFamilies: CadenceFamily[],
+): CadenceTemplate[] => CADENCE_TEMPLATES.filter(
+  (cadence) =>
+    cadenceFamilies.includes(cadence.family) &&
+    isCompatibleWithSonority(cadence.sonority, keyType) &&
+    getCadenceWeight(cadence, difficulty) > 0,
+);
+
+export const buildCadencedProgression = (
+  progression: ProgressionTemplate,
+  cadence: CadenceTemplate,
+  measures: number,
+): number[] => {
+  const cadenceLength = Math.min(measures, cadence.degrees.length);
+  const bodyLength = Math.max(0, measures - cadenceLength);
+  const body: number[] = [];
+
+  for (let i = 0; i < bodyLength; i++) {
+    body.push(progression.degrees[i % progression.degrees.length]);
+  }
+
+  if (
+    body.length > 1 &&
+    cadence.degrees.length > 0 &&
+    body[body.length - 1] === cadence.degrees[0]
+  ) {
+    const replacement = progression.degrees[
+      (body.length - 2 + progression.degrees.length) % progression.degrees.length
+    ];
+
+    if (replacement !== cadence.degrees[0]) {
+      body[body.length - 1] = replacement;
+    }
+  }
+
+  return [...body, ...cadence.degrees.slice(-cadenceLength)];
 };
 
 // Rhythmic Templates (Duration in beats)

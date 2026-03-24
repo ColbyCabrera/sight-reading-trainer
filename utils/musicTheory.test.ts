@@ -1,6 +1,14 @@
 import assert from "node:assert";
 import { test, describe } from "node:test";
-import { getSettingsForLevel } from "./musicTheory.ts";
+import {
+  buildCadencedProgression,
+  getCadenceWeight,
+  getEligibleCadences,
+  getEligibleProgressions,
+  getProgressionWeight,
+  getSettingsForLevel,
+  PROGRESSION_TEMPLATES,
+} from "./musicTheory.ts";
 import type { DifficultyLevel, GenerationSettings } from "../types.ts";
 
 describe("getSettingsForLevel", () => {
@@ -127,5 +135,67 @@ describe("getSettingsForLevel", () => {
         `Full settings mismatch for level ${level}`,
       );
     });
+  });
+
+  test("should keep every progression within valid scale-degree bounds", () => {
+    PROGRESSION_TEMPLATES.forEach((progression) => {
+      assert.ok(progression.degrees.length > 0, `${progression.id} must not be empty`);
+      progression.degrees.forEach((degree) => {
+        assert.ok(
+          degree >= 0 && degree <= 6,
+          `${progression.id} contains invalid degree ${degree}`,
+        );
+      });
+      assert.ok(
+        progression.cadenceFamilies.length > 0,
+        `${progression.id} must allow at least one cadence family`,
+      );
+    });
+  });
+
+  test("should filter progressions by key sonority", () => {
+    const majorProgressions = getEligibleProgressions("MAJOR", 3);
+    const minorProgressions = getEligibleProgressions("MINOR", 3);
+
+    assert.ok(majorProgressions.every((progression) => progression.sonority !== "MINOR"));
+    assert.ok(minorProgressions.every((progression) => progression.sonority !== "MAJOR"));
+    assert.ok(majorProgressions.some((progression) => progression.sonority === "MAJOR"));
+    assert.ok(minorProgressions.some((progression) => progression.sonority === "MINOR"));
+  });
+
+  test("should bias simpler progressions early without excluding richer ones", () => {
+    const basic = PROGRESSION_TEMPLATES.find((progression) => progression.id === "BASIC");
+    const circle = PROGRESSION_TEMPLATES.find((progression) => progression.id === "CIRCLE");
+
+    assert.ok(basic);
+    assert.ok(circle);
+    assert.ok(getProgressionWeight(basic!, 1) > getProgressionWeight(circle!, 1));
+    assert.ok(getProgressionWeight(circle!, 1) > 0);
+  });
+
+  test("should gate deceptive cadences until higher difficulty", () => {
+    const earlyCadences = getEligibleCadences("MAJOR", 2, ["AUTHENTIC", "DECEPTIVE"]);
+    const advancedCadences = getEligibleCadences("MINOR", 6, ["AUTHENTIC", "DECEPTIVE"]);
+
+    assert.ok(earlyCadences.every((cadence) => cadence.family !== "DECEPTIVE"));
+    assert.ok(advancedCadences.some((cadence) => cadence.family === "DECEPTIVE"));
+    assert.ok(
+      advancedCadences.every((cadence) => getCadenceWeight(cadence, 6) > 0),
+    );
+  });
+
+  test("should build a progression that ends with the selected cadence", () => {
+    const progression = PROGRESSION_TEMPLATES.find((template) => template.id === "CLASSICAL");
+    const cadence = getEligibleCadences("MAJOR", 4, ["PLAGAL"]).find(
+      (entry) => entry.family === "PLAGAL",
+    );
+
+    assert.ok(progression);
+    assert.ok(cadence);
+
+    const result = buildCadencedProgression(progression!, cadence!, 8);
+
+    assert.strictEqual(result.length, 8);
+    assert.deepStrictEqual(result.slice(-cadence!.degrees.length), cadence!.degrees);
   });
 });

@@ -9,7 +9,6 @@ import {
   DifficultyLevel,
   LoadingState,
   MusicalKey,
-  GenerationMode,
   GenerationSettings,
 } from "./types";
 import { getSettingsForLevel } from "./utils/musicTheory";
@@ -17,8 +16,6 @@ import { getSettingsForLevel } from "./utils/musicTheory";
 const App: React.FC = () => {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
   const [selectedKey, setSelectedKey] = useState<MusicalKey>("Random");
-  const [generationMode, setGenerationMode] =
-    useState<GenerationMode>("Algorithm");
 
   // Initialize settings based on default difficulty 1
   const [settings, setSettings] = useState<GenerationSettings>(
@@ -34,27 +31,17 @@ const App: React.FC = () => {
     async (
       level: DifficultyLevel,
       key: MusicalKey,
-      mode: GenerationMode,
       currentSettings: GenerationSettings,
     ) => {
       setLoadingState("generating");
       setExercise(null);
       setError(null);
       try {
-        let newExercise: SightReadingExercise;
-
-        if (mode === "Algorithm") {
-          // Simulate async delay for UI consistency
-          await new Promise((resolve) => setTimeout(resolve, 600));
-          // Pass the current granular settings
-          newExercise = generateAlgorithmicSheetMusic(
-            level,
-            key,
-            currentSettings,
-          );
-        } else {
-          newExercise = await generateSheetMusic(level, key);
-        }
+        let newExercise: SightReadingExercise = generateAlgorithmicSheetMusic(
+          level,
+          key,
+          currentSettings,
+        );
 
         setExercise(newExercise);
         setHistory((prev) => [newExercise, ...prev].slice(0, 10));
@@ -72,7 +59,7 @@ const App: React.FC = () => {
 
   // Initial generation on mount only; getSettingsForLevel is a stable module fn (no dep needed)
   useEffect(() => {
-    handleGenerate(1, "Random", "Algorithm", getSettingsForLevel(1));
+    handleGenerate(1, "Random", getSettingsForLevel(1));
   }, [handleGenerate]);
 
   const handleDifficultyChange = (newLevel: DifficultyLevel) => {
@@ -83,10 +70,6 @@ const App: React.FC = () => {
 
   const handleKeyChange = (newKey: MusicalKey) => {
     setSelectedKey(newKey);
-  };
-
-  const handleModeChange = (newMode: GenerationMode) => {
-    setGenerationMode(newMode);
   };
 
   const handleSettingsChange = (newSettings: GenerationSettings) => {
@@ -104,19 +87,13 @@ const App: React.FC = () => {
             <ControlPanel
               difficulty={difficulty}
               selectedKey={selectedKey}
-              generationMode={generationMode}
               loadingState={loadingState}
               settings={settings}
               onDifficultyChange={handleDifficultyChange}
               onKeyChange={handleKeyChange}
               onSettingsChange={handleSettingsChange}
               onGenerate={() =>
-                handleGenerate(
-                  difficulty,
-                  selectedKey,
-                  generationMode,
-                  settings,
-                )
+                handleGenerate(difficulty, selectedKey, settings)
               }
             />
 
@@ -161,9 +138,7 @@ const App: React.FC = () => {
                 <div className="absolute inset-0 z-20 bg-white/50 backdrop-blur-md flex flex-col items-center justify-center text-stone-700">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mb-4 drop-shadow-[0_0_10px_rgba(217,119,6,0.5)]"></div>
                   <p className="font-heading text-xl animate-pulse text-amber-900 tracking-wide">
-                    {generationMode === "AI"
-                      ? "Composing new piece..."
-                      : "Calculating notes..."}
+                    Calculating notes...
                   </p>
                 </div>
               )}
@@ -178,12 +153,7 @@ const App: React.FC = () => {
                     <p className="text-stone-600 mb-6">{error}</p>
                     <button
                       onClick={() =>
-                        handleGenerate(
-                          difficulty,
-                          selectedKey,
-                          generationMode,
-                          settings,
-                        )
+                        handleGenerate(difficulty, selectedKey, settings)
                       }
                       className="px-6 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors"
                     >

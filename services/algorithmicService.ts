@@ -639,7 +639,12 @@ class AccompanimentGenerator {
         ? [root, fifth, third, fifth, root, fifth, third, fifth]
         : [root, fifth, third, fifth, third, fifth];
 
-    return pattern.map((pitch) => ({ type: "note", pitch, duration: 0.5 }));
+    return pattern.map((pitch, index) => ({
+      type: "note",
+      pitch,
+      duration: 0.5,
+      beamBreakAfter: timeSig === "4/4" ? index === 3 || index === 7 : undefined,
+    }));
   }
 
   /** Builds a simple arpeggiated broken-chord accompaniment. */
@@ -798,7 +803,12 @@ class AbcEngraver {
             currentBeat += token.duration;
           }
 
-          if (currentBeat % 1 === 0) partString += " ";
+          if (
+            token.beamBreakAfter ??
+            currentBeat % 1 === 0
+          ) {
+            partString += " ";
+          }
         });
 
         partString += mIdx === part.measures.length - 1 ? "|]" : "| ";

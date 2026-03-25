@@ -14,6 +14,7 @@ export interface NoteToken {
   duration: number; // In beats (1 = quarter note)
   velocity?: number; // 0-127
   dynamic?: string; // 'pp', 'p', 'mp', 'mf', 'f', 'ff'
+  beamBreakAfter?: boolean;
 }
 
 export interface Measure {

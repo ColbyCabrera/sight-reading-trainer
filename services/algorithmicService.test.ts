@@ -165,6 +165,27 @@ describe("generateAlgorithmicSheetMusic", () => {
     assert.ok(!trebleVoice.includes("C3/2B/2 C2"));
   });
 
+  test("should group 4/4 Alberti bass into two eighth-note beams per measure", () => {
+    const customSettings: GenerationSettings = {
+      maxInterval: 5,
+      rhythmComplexity: 3,
+      rhythmVariance: 0,
+      handCoordination: "INDEPENDENT",
+      accompanimentStyle: ["ALBERTI"],
+      playability: "OCTAVE",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(5, "C Major", customSettings)
+    );
+
+    const bassVoice = getVoiceBody(result.abcNotation, "bass");
+    const firstMeasure = bassVoice.split("|")[0].trimEnd();
+    const beamBreaks = (firstMeasure.match(/ /g) ?? []).length;
+
+    assert.strictEqual(beamBreaks, 1);
+  });
+
   test("should fall back to block chords when independent mode receives NONE", () => {
     const customSettings: GenerationSettings = {
       maxInterval: 5,

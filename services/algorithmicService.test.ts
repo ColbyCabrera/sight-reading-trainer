@@ -145,6 +145,26 @@ describe("generateAlgorithmicSheetMusic", () => {
     assert.ok(!bassVoice.includes("z"));
   });
 
+  test("should preserve upper-register key-signature spellings in Gb major parallel mode", () => {
+    const customSettings: GenerationSettings = {
+      maxInterval: 6,
+      rhythmComplexity: 3,
+      rhythmVariance: 0.6,
+      handCoordination: "PARALLEL",
+      accompanimentStyle: ["NONE"],
+      playability: "OCTAVE",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(3, "Gb Major", customSettings)
+    );
+
+    const trebleVoice = getVoiceBody(result.abcNotation, "treble");
+
+    assert.ok(trebleVoice.includes("c3/2B/2 c2"));
+    assert.ok(!trebleVoice.includes("C3/2B/2 C2"));
+  });
+
   test("should fall back to block chords when independent mode receives NONE", () => {
     const customSettings: GenerationSettings = {
       maxInterval: 5,

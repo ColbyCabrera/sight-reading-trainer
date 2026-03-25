@@ -936,7 +936,6 @@ class AbcEngraver {
 
     const { forward: diatonicMap, reverse: reverseDiatonicMap } =
       this.getDiatonicMaps(keyName);
-    const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
 
     let matchedLetter = reverseDiatonicMap[pc];
     let acc = "";
@@ -949,6 +948,8 @@ class AbcEngraver {
         diatonicMap,
         keyName,
       ));
+    } else {
+      accShift = this.getKeySignatureAccidentalShift(baseLetter, diatonicMap);
     }
 
     if (!baseLetter) baseLetter = "C";
@@ -980,6 +981,25 @@ class AbcEngraver {
       reverseMap[forwardMap[noteName]] = noteName;
     }
     return reverseMap;
+  }
+
+  /** Converts a key-signature letter spelling back to its natural-note octave anchor. */
+  private static getKeySignatureAccidentalShift(
+    baseLetter: string,
+    diatonicMap: Record<string, number>,
+  ): number {
+    const naturalPitchClass = NOTES.indexOf(baseLetter);
+    const signaturePitchClass = diatonicMap[baseLetter];
+
+    if (naturalPitchClass < 0 || signaturePitchClass === undefined) {
+      return 0;
+    }
+
+    let shift = signaturePitchClass - naturalPitchClass;
+    if (shift > 6) shift -= 12;
+    if (shift < -6) shift += 12;
+
+    return shift;
   }
 
   /** Detects the raised sixth and seventh scale degrees used in minor-key spelling. */

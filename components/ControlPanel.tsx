@@ -268,7 +268,7 @@ export function ControlPanel({
               className="w-full flex items-center justify-between p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-amber-500/20 focus-visible:border-amber-500"
             >
               <div className="flex flex-col items-start gap-0.5">
-                <span className="text-[11px] font-bold text-stone-500 uppercase tracking-widest">
+                <span className="text-[11px] text-left font-bold text-stone-500 uppercase tracking-widest">
                   Keys & Accompaniment
                 </span>
                 <span className="text-xs text-amber-700 font-semibold">

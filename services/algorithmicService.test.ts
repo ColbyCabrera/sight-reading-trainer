@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import { test, describe } from "node:test";
 import { generateAlgorithmicSheetMusic } from "./algorithmicService.ts";
+import { getDefaultKeyPoolForLevel } from "../utils/musicTheory.ts";
 import type { GenerationSettings } from "../types.ts";
 
 const withMockedRandom = <T>(value: number, fn: () => T): T => {
@@ -62,13 +63,22 @@ describe("generateAlgorithmicSheetMusic", () => {
   test('should handle "Random" key', () => {
     const result = generateAlgorithmicSheetMusic(1, "Random");
 
-    const validKeys = ["C Major", "G Major", "F Major", "A Minor"];
-    assert.ok(validKeys.includes(result.key as string));
+    const validKeys = getDefaultKeyPoolForLevel(1);
+    assert.ok(validKeys.includes(result.key as (typeof validKeys)[number]));
     assert.ok(
       result.abcNotation.includes(
         `K:${result.key.replace(" Major", "").replace(" Minor", "m")}`,
       ),
     );
+  });
+
+  test("should choose from the provided key pool", () => {
+    const result = withMockedRandom(0.999999, () =>
+      generateAlgorithmicSheetMusic(2, ["C Major", "E Minor"])
+    );
+
+    assert.strictEqual(result.key, "E Minor");
+    assert.ok(result.abcNotation.includes("K:Em"));
   });
 
   test("should respect custom settings", () => {

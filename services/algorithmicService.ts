@@ -1,10 +1,12 @@
 import type {
+  ConcreteMusicalKey,
   SightReadingExercise,
   DifficultyLevel,
-  MusicalKey,
   GenerationSettings,
+  KeySelection,
 } from "../types.ts";
 import {
+  getDefaultKeyPoolForLevel,
   buildCadencedProgression,
   getCadenceWeight,
   getEligibleCadences,
@@ -72,18 +74,21 @@ const resolveHandCoordination = (
 /** Restricts early difficulties to a small set of pedagogically safe random keys. */
 const resolveSelectedKey = (
   difficulty: DifficultyLevel,
-  selectedKey: MusicalKey,
-): MusicalKey => {
+  selectedKey: KeySelection,
+): ConcreteMusicalKey => {
+  if (Array.isArray(selectedKey)) {
+    const pool = selectedKey.length > 0
+      ? selectedKey
+      : getDefaultKeyPoolForLevel(difficulty);
+
+    return getRandomElement(pool);
+  }
+
   if (selectedKey !== "Random") {
     return selectedKey;
   }
 
-  const validKeys =
-    difficulty <= 2
-      ? ["C Major", "G Major", "F Major", "A Minor"]
-      : Object.keys(KEY_MAP);
-
-  return getRandomElement(validKeys) as MusicalKey;
+  return getRandomElement(getDefaultKeyPoolForLevel(difficulty));
 };
 
 /**
@@ -1107,12 +1112,12 @@ class AbcEngraver {
  * engraved ABC notation consumed by the UI.
  *
  * @param difficulty Public difficulty level selected by the user.
- * @param selectedKey Specific key or `Random` for weighted random selection.
+ * @param selectedKey Specific key, key pool, or `Random` for level-default selection.
  * @param customSettings Optional overrides for the default level settings.
  */
 export const generateAlgorithmicSheetMusic = (
   difficulty: DifficultyLevel,
-  selectedKey: MusicalKey,
+  selectedKey: KeySelection,
   customSettings?: GenerationSettings,
 ): SightReadingExercise => {
   // 1. CONFIGURATION

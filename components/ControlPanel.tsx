@@ -1,68 +1,36 @@
 import { useId, useState, type ChangeEvent, type CSSProperties } from "react";
 import {
+  type ConcreteMusicalKey,
   type DifficultyLevel,
   type LoadingState,
-  type MusicalKey,
   type GenerationSettings,
 } from "../types";
 
+import { KeyAccompanimentDialog } from "./KeyAccompanimentDialog";
+
 interface ControlPanelProps {
   difficulty: DifficultyLevel;
-  selectedKey: MusicalKey;
+  selectedKeys: ConcreteMusicalKey[];
   loadingState: LoadingState;
   settings: GenerationSettings;
   onDifficultyChange: (level: DifficultyLevel) => void;
-  onKeyChange: (key: MusicalKey) => void;
+  onKeyPoolChange: (keys: ConcreteMusicalKey[]) => void;
   onSettingsChange: (settings: GenerationSettings) => void;
   onGenerate: () => void;
 }
 
-const KEY_GROUPS: { label: string; keys: MusicalKey[] }[] = [
-  {
-    label: "Major Keys",
-    keys: [
-      "C Major",
-      "G Major",
-      "D Major",
-      "A Major",
-      "E Major",
-      "B Major",
-      "F# Major",
-      "C# Major",
-      "F Major",
-      "Bb Major",
-      "Eb Major",
-      "Ab Major",
-      "Db Major",
-      "Gb Major",
-      "Cb Major",
-    ],
-  },
-  {
-    label: "Minor Keys",
-    keys: [
-      "A Minor",
-      "E Minor",
-      "B Minor",
-      "F# Minor",
-      "D Minor",
-      "G Minor",
-      "C Minor",
-    ],
-  },
-];
-
 export function ControlPanel({
   difficulty,
-  selectedKey,
+  selectedKeys,
   loadingState,
   settings,
   onDifficultyChange,
-  onKeyChange,
+  onKeyPoolChange,
   onSettingsChange,
   onGenerate,
 }: ControlPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showKeyDialog, setShowKeyDialog] = useState(false);
   const isLoading = loadingState === "generating";
   const advancedPanelId = useId();
 
@@ -291,91 +259,55 @@ export function ControlPanel({
             />
           </div>
 
-          {/* Accompaniment Style */}
+          {/* Keys & Accompaniment Dialog Trigger */}
           <div>
-            <div className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-3">
-              Accompaniment Pools
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {(["BLOCK", "BROKEN", "ALBERTI", "WALTZ", "STRIDE"] as const).map(
-                (style) => {
-                  const currentStyles = settings.accompanimentStyle;
-                  return (
-                    <label
-                      key={style}
-                      className={`flex items-center gap-2 text-[13px] font-medium p-2 rounded-md border transition-colors cursor-pointer
-                      ${
-                        settings.handCoordination !== "INDEPENDENT"
-                          ? "opacity-50 cursor-not-allowed bg-stone-50/50"
-                          : "hover:bg-[#FDFBF7]"
-                      }
-                      ${
-                        currentStyles.includes(style)
-                          ? "border-amber-200 bg-amber-50/50 text-amber-800"
-                          : "border-[#E8DEC1] text-stone-600"
-                      }
-                    `}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={currentStyles.includes(style)}
-                        onChange={(e) => {
-                          let newStyles: typeof currentStyles;
-                          if (e.target.checked) {
-                            newStyles = [...currentStyles, style];
-                          } else {
-                            newStyles = currentStyles.filter(
-                              (s) => s !== style,
-                            );
-                          }
-                          if (newStyles.length === 0) newStyles = ["BLOCK"];
-                          updateSetting("accompanimentStyle", newStyles);
-                        }}
-                        disabled={settings.handCoordination !== "INDEPENDENT"}
-                        className="rounded border-[#E8DEC1] text-amber-600 focus:ring-amber-500 w-4 h-4"
-                      />
-                      {style.charAt(0) + style.slice(1).toLowerCase()}
-                    </label>
-                  );
-                },
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowKeyDialog(true)}
+              disabled={isLoading}
+              className="w-full flex items-center justify-between p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-amber-500/20 focus-visible:border-amber-500"
+            >
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-[11px] font-bold text-stone-500 uppercase tracking-widest">
+                  Keys & Accompaniment
+                </span>
+                <span className="text-xs text-amber-700 font-semibold">
+                  {selectedKeys.length} key
+                  {selectedKeys.length !== 1 ? "s" : ""} ·{" "}
+                  {settings.accompanimentStyle.length} style
+                  {settings.accompanimentStyle.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-4 h-4 text-stone-400"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
           </div>
-        </div>
-      </div>
 
-      <div className="mb-10">
-        <label
-          htmlFor="musicalKey"
-          className="block text-[11px] font-bold text-stone-500 uppercase tracking-widest mb-2"
-        >
-          Musical Key
-        </label>
-        <select
-          id="musicalKey"
-          value={selectedKey}
-          onChange={(e) => onKeyChange(e.target.value as MusicalKey)}
-          disabled={isLoading}
-          className="w-full p-3 bg-white border border-[#E8DEC1] rounded-lg text-stone-800 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-medium appearance-none shadow-sm"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2378716c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-            backgroundPosition: `right 0.75rem center`,
-            backgroundRepeat: `no-repeat`,
-            backgroundSize: `1.5em 1.5em`,
-            paddingRight: `2.5rem`,
-          }}
-        >
-          <option value="Random">Random</option>
-          {KEY_GROUPS.map((group) => (
-            <optgroup key={group.label} label={group.label}>
-              {group.keys.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+          <KeyAccompanimentDialog
+            open={showKeyDialog}
+            onClose={() => setShowKeyDialog(false)}
+            difficulty={difficulty}
+            selectedKeys={selectedKeys}
+            settings={settings}
+            isLoading={isLoading}
+            onKeyPoolChange={onKeyPoolChange}
+            onAccompanimentChange={(styles) =>
+              updateSetting("accompanimentStyle", styles)
+            }
+          />
+        </div>
       </div>
 
       <button

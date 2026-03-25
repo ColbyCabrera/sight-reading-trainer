@@ -1,4 +1,8 @@
-import type { GenerationSettings, DifficultyLevel } from "../types.ts";
+import type {
+  ConcreteMusicalKey,
+  DifficultyLevel,
+  GenerationSettings,
+} from "../types.ts";
 
 /**
  * MUSIC THEORY ENGINE & RULES
@@ -751,6 +755,168 @@ export const getSettingsForLevel = (
     playability: "LARGE",
   };
 };
+
+export const KEY_GROUPS: { label: string; keys: ConcreteMusicalKey[] }[] = [
+  {
+    label: "Major Keys",
+    keys: [
+      "C Major",
+      "G Major",
+      "D Major",
+      "A Major",
+      "E Major",
+      "B Major",
+      "F# Major",
+      "C# Major",
+      "F Major",
+      "Bb Major",
+      "Eb Major",
+      "Ab Major",
+      "Db Major",
+      "Gb Major",
+      "Cb Major",
+    ],
+  },
+  {
+    label: "Minor Keys",
+    keys: [
+      "A Minor",
+      "E Minor",
+      "B Minor",
+      "F# Minor",
+      "D Minor",
+      "G Minor",
+      "C Minor",
+    ],
+  },
+];
+
+export const ALL_CONCRETE_KEYS: ConcreteMusicalKey[] = KEY_GROUPS.flatMap(
+  (group) => group.keys,
+);
+
+const LEVEL_DEFAULT_KEY_POOLS: Record<DifficultyLevel, ConcreteMusicalKey[]> = {
+  1: ["C Major", "G Major", "F Major"],
+  2: ["C Major", "G Major", "F Major", "A Minor", "E Minor"],
+  3: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+  ],
+  4: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+  ],
+  5: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+    "E Major",
+    "B Minor",
+    "G Minor",
+  ],
+  6: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+    "E Major",
+    "B Minor",
+    "G Minor",
+    "B Major",
+    "F# Minor",
+  ],
+  7: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+    "E Major",
+    "B Minor",
+    "G Minor",
+    "B Major",
+    "F# Minor",
+    "Eb Major",
+    "Ab Major",
+    "C Minor",
+  ],
+  8: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+    "E Major",
+    "B Minor",
+    "G Minor",
+    "B Major",
+    "F# Minor",
+    "Eb Major",
+    "Ab Major",
+    "C Minor",
+    "F# Major",
+    "Db Major",
+  ],
+  9: [
+    "C Major",
+    "G Major",
+    "F Major",
+    "A Minor",
+    "E Minor",
+    "D Major",
+    "Bb Major",
+    "D Minor",
+    "A Major",
+    "E Major",
+    "B Minor",
+    "G Minor",
+    "B Major",
+    "F# Minor",
+    "Eb Major",
+    "Ab Major",
+    "C Minor",
+    "F# Major",
+    "Db Major",
+    "Gb Major",
+    "Cb Major",
+  ],
+  10: ALL_CONCRETE_KEYS,
+};
+
+export const getDefaultKeyPoolForLevel = (
+  level: DifficultyLevel,
+): ConcreteMusicalKey[] => [...LEVEL_DEFAULT_KEY_POOLS[level]];
 
 export const KEY_MAP: Record<
   string,

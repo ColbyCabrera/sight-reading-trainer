@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import { test, describe } from "node:test";
 import {
+  getDefaultKeyPoolForLevel,
   buildCadencedProgression,
   getCadenceWeight,
   getEligibleCadences,
@@ -197,5 +198,23 @@ describe("getSettingsForLevel", () => {
 
     assert.strictEqual(result.length, 8);
     assert.deepStrictEqual(result.slice(-cadence!.degrees.length), cadence!.degrees);
+  });
+
+  test("should default level 1 keys to C, G, and F major", () => {
+    assert.deepStrictEqual(getDefaultKeyPoolForLevel(1), [
+      "C Major",
+      "G Major",
+      "F Major",
+    ]);
+  });
+
+  test("should add A minor and E minor to the level 2 default key pool", () => {
+    assert.deepStrictEqual(getDefaultKeyPoolForLevel(2), [
+      "C Major",
+      "G Major",
+      "F Major",
+      "A Minor",
+      "E Minor",
+    ]);
   });
 });

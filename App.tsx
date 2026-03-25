@@ -4,17 +4,20 @@ import { ControlPanel } from "./components/ControlPanel";
 import { ScoreDisplay } from "./components/ScoreDisplay";
 import { generateAlgorithmicSheetMusic } from "./services/algorithmicService";
 import {
+  type ConcreteMusicalKey,
   type SightReadingExercise,
   type DifficultyLevel,
   type LoadingState,
-  type MusicalKey,
   type GenerationSettings,
+  type KeySelection,
 } from "./types";
-import { getSettingsForLevel } from "./utils/musicTheory";
+import { getDefaultKeyPoolForLevel, getSettingsForLevel } from "./utils/musicTheory";
 
 function App() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
-  const [selectedKey, setSelectedKey] = useState<MusicalKey>("Random");
+  const [selectedKeys, setSelectedKeys] = useState<ConcreteMusicalKey[]>(
+    getDefaultKeyPoolForLevel(1),
+  );
 
   // Initialize settings based on default difficulty 1
   const [settings, setSettings] = useState<GenerationSettings>(
@@ -29,7 +32,7 @@ function App() {
   const handleGenerate = useCallback(
     async (
       level: DifficultyLevel,
-      key: MusicalKey,
+      keySelection: KeySelection,
       currentSettings: GenerationSettings,
     ) => {
       setLoadingState("generating");
@@ -38,7 +41,7 @@ function App() {
       try {
         const newExercise: SightReadingExercise = generateAlgorithmicSheetMusic(
           level,
-          key,
+          keySelection,
           currentSettings,
         );
 
@@ -58,17 +61,18 @@ function App() {
 
   // Initial generation on mount only; getSettingsForLevel is a stable module fn (no dep needed)
   useEffect(() => {
-    handleGenerate(1, "Random", getSettingsForLevel(1));
+    handleGenerate(1, getDefaultKeyPoolForLevel(1), getSettingsForLevel(1));
   }, [handleGenerate]);
 
   const handleDifficultyChange = (newLevel: DifficultyLevel) => {
     setDifficulty(newLevel);
     // Reset settings to defaults for this level when using main slider
     setSettings(getSettingsForLevel(newLevel));
+    setSelectedKeys(getDefaultKeyPoolForLevel(newLevel));
   };
 
-  const handleKeyChange = (newKey: MusicalKey) => {
-    setSelectedKey(newKey);
+  const handleKeyPoolChange = (newKeys: ConcreteMusicalKey[]) => {
+    setSelectedKeys(newKeys);
   };
 
   const handleSettingsChange = (newSettings: GenerationSettings) => {
@@ -85,14 +89,14 @@ function App() {
           <div className="lg:col-span-3 flex flex-col gap-6">
             <ControlPanel
               difficulty={difficulty}
-              selectedKey={selectedKey}
+              selectedKeys={selectedKeys}
               loadingState={loadingState}
               settings={settings}
               onDifficultyChange={handleDifficultyChange}
-              onKeyChange={handleKeyChange}
+              onKeyPoolChange={handleKeyPoolChange}
               onSettingsChange={handleSettingsChange}
               onGenerate={() =>
-                handleGenerate(difficulty, selectedKey, settings)
+                handleGenerate(difficulty, selectedKeys, settings)
               }
             />
 
@@ -152,7 +156,7 @@ function App() {
                     <p className="text-stone-600 mb-6">{error}</p>
                     <button
                       onClick={() =>
-                        handleGenerate(difficulty, selectedKey, settings)
+                        handleGenerate(difficulty, selectedKeys, settings)
                       }
                       className="px-6 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors"
                     >
@@ -171,7 +175,7 @@ function App() {
                   <p className="text-slate-500 text-sm mt-2 font-medium">
                     {exercise
                       ? exercise.description
-                      : "Select a difficulty level and key, then click Generate."}
+                      : "Select a difficulty level and key pool, then click Generate."}
                   </p>
                 </div>
                 {exercise && (

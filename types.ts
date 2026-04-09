@@ -29,8 +29,6 @@ export type ConcreteMusicalKey = Exclude<MusicalKey, "Random">;
 
 export type KeySelection = MusicalKey | ConcreteMusicalKey[];
 
-export type GenerationMode = "AI" | "Algorithm";
-
 export interface GenerationSettings {
   maxInterval: number;
   rhythmComplexity: DifficultyLevel;

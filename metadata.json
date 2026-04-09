@@ -1,5 +1,5 @@
 {
   "name": "At First Sight",
-  "description": "A dynamic piano sight-reading practice application powered by Gemini. Generates unique sheet music exercises across 10 difficulty levels.",
+  "description": "A dynamic piano sight-reading practice application. Generates unique sheet music exercises across 10 difficulty levels using a custom algorithmic engine.",
   "requestFramePermissions": []
 }

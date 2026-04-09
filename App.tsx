@@ -11,7 +11,11 @@ import {
   type GenerationSettings,
   type KeySelection,
 } from "./types";
-import { getDefaultKeyPoolForLevel, getSettingsForLevel } from "./utils/musicTheory";
+import {
+  getDefaultKeyPoolForLevel,
+  getDefaultMaxMeasuresForLevel,
+  getSettingsForLevel,
+} from "./utils/musicTheory";
 
 function App() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
@@ -65,9 +69,18 @@ function App() {
   }, [handleGenerate]);
 
   const handleDifficultyChange = (newLevel: DifficultyLevel) => {
+    const previousDefaultMeasureCount = getDefaultMaxMeasuresForLevel(difficulty);
+    const nextDefaultSettings = getSettingsForLevel(newLevel);
+
     setDifficulty(newLevel);
     // Reset settings to defaults for this level when using main slider
-    setSettings(getSettingsForLevel(newLevel));
+    setSettings((currentSettings) => ({
+      ...nextDefaultSettings,
+      maxMeasures:
+        currentSettings.maxMeasures === previousDefaultMeasureCount
+          ? nextDefaultSettings.maxMeasures
+          : currentSettings.maxMeasures,
+    }));
     setSelectedKeys(getDefaultKeyPoolForLevel(newLevel));
   };
 

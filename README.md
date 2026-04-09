@@ -5,6 +5,7 @@ A piano sight-reading trainer that algorithmically generates sheet music exercis
 ## Features
 
 - **10 difficulty levels** from beginner (5-finger position, simple rhythms) to virtuoso (wide intervals, complex hand coordination)
+- **Adjustable score length** so you can cap each exercise at the number of measures you want to practice
 - **Key selection** — pick from any major or minor key, or let the app choose from a pedagogically appropriate pool for the selected level
 - **Advanced settings** — customize rhythm complexity, rhythm variance, max melodic interval, hand coordination mode, accompaniment style, and playability range
 - **Score rendering** via [abcjs](https://www.abcjs.net/) with built-in MIDI playback and tempo control

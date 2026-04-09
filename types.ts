@@ -30,6 +30,7 @@ export type ConcreteMusicalKey = Exclude<MusicalKey, "Random">;
 export type KeySelection = MusicalKey | ConcreteMusicalKey[];
 
 export interface GenerationSettings {
+  maxMeasures: number;
   maxInterval: number;
   rhythmComplexity: DifficultyLevel;
   rhythmVariance: number; // 0 to 1, probability of selecting 'rare' patterns

@@ -18,6 +18,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 1,
         expected: {
+          maxMeasures: 8,
           maxInterval: 2,
           handCoordination: "SEPARATE",
           playability: "5-FINGER",
@@ -29,6 +30,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 2,
         expected: {
+          maxMeasures: 8,
           maxInterval: 3,
           handCoordination: "RANDOM",
           playability: "5-FINGER",
@@ -40,6 +42,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 3,
         expected: {
+          maxMeasures: 16,
           maxInterval: 6,
           handCoordination: "RANDOM",
           playability: "OCTAVE",
@@ -51,6 +54,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 4,
         expected: {
+          maxMeasures: 16,
           maxInterval: 4,
           handCoordination: "INDEPENDENT",
           playability: "5-FINGER",
@@ -62,6 +66,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 5,
         expected: {
+          maxMeasures: 16,
           maxInterval: 5,
           handCoordination: "INDEPENDENT",
           playability: "OCTAVE",
@@ -73,6 +78,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 6,
         expected: {
+          maxMeasures: 16,
           maxInterval: 6,
           handCoordination: "INDEPENDENT",
           playability: "OCTAVE",
@@ -84,6 +90,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 7,
         expected: {
+          maxMeasures: 16,
           maxInterval: 8,
           handCoordination: "INDEPENDENT",
           playability: "OCTAVE",
@@ -95,6 +102,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 8,
         expected: {
+          maxMeasures: 16,
           maxInterval: 12,
           handCoordination: "INDEPENDENT",
           playability: "LARGE",
@@ -106,6 +114,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 9,
         expected: {
+          maxMeasures: 16,
           maxInterval: 12,
           handCoordination: "INDEPENDENT",
           playability: "LARGE",
@@ -117,6 +126,7 @@ describe("getSettingsForLevel", () => {
       {
         level: 10,
         expected: {
+          maxMeasures: 16,
           maxInterval: 12,
           handCoordination: "INDEPENDENT",
           playability: "LARGE",
@@ -206,6 +216,11 @@ describe("getSettingsForLevel", () => {
       "G Major",
       "F Major",
     ]);
+  });
+
+  test("should default shorter pieces to early levels and longer ones later", () => {
+    assert.strictEqual(getSettingsForLevel(2).maxMeasures, 8);
+    assert.strictEqual(getSettingsForLevel(3).maxMeasures, 16);
   });
 
   test("should add A minor and E minor to the level 2 default key pool", () => {

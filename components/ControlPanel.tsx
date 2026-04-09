@@ -8,6 +8,8 @@ import {
 
 import { KeyAccompanimentDialog } from "./KeyAccompanimentDialog";
 
+const MEASURE_OPTIONS = [4, 8, 12, 16, 20, 24] as const;
+
 interface ControlPanelProps {
   difficulty: DifficultyLevel;
   selectedKeys: ConcreteMusicalKey[];
@@ -87,6 +89,41 @@ export function ControlPanel({
           <span>Advanced</span>
           <span>Virtuoso</span>
         </div>
+      </div>
+
+      <div className="mb-8 border-t border-[#E8DEC1] pt-5">
+        <div className="flex justify-between items-end mb-3">
+          <label
+            htmlFor="maxMeasures"
+            className="text-sm font-semibold text-stone-600"
+          >
+            Max Measures
+          </label>
+          <span className="text-sm font-bold text-amber-700 font-heading leading-none">
+            {settings.maxMeasures} bars
+          </span>
+        </div>
+
+        <select
+          id="maxMeasures"
+          value={settings.maxMeasures}
+          onChange={(e) => updateSetting("maxMeasures", Number(e.target.value))}
+          className="w-full text-sm p-3 rounded-lg border border-[#E8DEC1] bg-white text-stone-700 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2378716c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: `right 0.5rem center`,
+            backgroundRepeat: `no-repeat`,
+            backgroundSize: `1.5em 1.5em`,
+            paddingRight: `2.5rem`,
+          }}
+          disabled={isLoading}
+        >
+          {MEASURE_OPTIONS.map((measureCount) => (
+            <option key={measureCount} value={measureCount}>
+              Up to {measureCount} measures
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Advanced Settings Toggle */}

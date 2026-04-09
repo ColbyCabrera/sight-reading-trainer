@@ -665,12 +665,17 @@ export const INTERNAL_PROFILES: Record<number, InternalDifficultyProfile> = {
  * changing every parameter on every level. Adjacent levels often share the same
  * coordination model while rhythm, reach, and accompaniment vocabulary advance.
  */
+export const getDefaultMaxMeasuresForLevel = (
+  level: DifficultyLevel,
+): number => (level <= 2 ? 8 : 16);
+
 export const getSettingsForLevel = (
   level: DifficultyLevel,
 ): GenerationSettings => {
   // Level 1: Hands Separate (Alternating), Simple Rhythm, 5-finger
   if (level === 1)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 2,
       rhythmComplexity: 1,
       rhythmVariance: 0.8,
@@ -682,6 +687,7 @@ export const getSettingsForLevel = (
   // Level 2: Add Parallel Motion (Hands locked), Simple Rhythm
   if (level === 2)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 3,
       rhythmComplexity: 2,
       rhythmVariance: 0.3,
@@ -693,6 +699,7 @@ export const getSettingsForLevel = (
   // Level 3: add more complexity
   if (level === 3)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 6,
       rhythmComplexity: 3,
       rhythmVariance: 0.6,
@@ -704,6 +711,7 @@ export const getSettingsForLevel = (
   // Level 4: First Hands Together (Independent), Simple Block Chords
   if (level === 4)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 4,
       rhythmComplexity: 2,
       rhythmVariance: 0.3,
@@ -715,6 +723,7 @@ export const getSettingsForLevel = (
   // Level 5: More variation and complexity
   if (level === 5)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 5,
       rhythmComplexity: 3,
       rhythmVariance: 0.4,
@@ -726,6 +735,7 @@ export const getSettingsForLevel = (
   // Level 6: More variation
   if (level === 6)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 6,
       rhythmComplexity: 5,
       rhythmVariance: 0.5,
@@ -737,6 +747,7 @@ export const getSettingsForLevel = (
   // Level 7
   if (level <= 7)
     return {
+      maxMeasures: getDefaultMaxMeasuresForLevel(level),
       maxInterval: 8,
       rhythmComplexity: level as DifficultyLevel,
       rhythmVariance: 0.6,
@@ -747,6 +758,7 @@ export const getSettingsForLevel = (
 
   // Level 8+
   return {
+    maxMeasures: getDefaultMaxMeasuresForLevel(level),
     maxInterval: 12,
     rhythmComplexity: level as DifficultyLevel,
     rhythmVariance: 0.7,

@@ -83,6 +83,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should respect custom settings", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 12,
       maxInterval: 4,
       rhythmComplexity: 5,
       rhythmVariance: 0.5,
@@ -115,6 +116,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should alternate rests between hands in separate mode", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 8,
       maxInterval: 2,
       rhythmComplexity: 1,
       rhythmVariance: 0,
@@ -137,6 +139,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should mirror the melody without rests in parallel mode", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 16,
       maxInterval: 4,
       rhythmComplexity: 3,
       rhythmVariance: 0,
@@ -157,6 +160,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should preserve upper-register key-signature spellings in Gb major parallel mode", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 16,
       maxInterval: 6,
       rhythmComplexity: 3,
       rhythmVariance: 0.6,
@@ -177,6 +181,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should group 4/4 Alberti bass into two eighth-note beams per measure", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 16,
       maxInterval: 5,
       rhythmComplexity: 3,
       rhythmVariance: 0,
@@ -198,6 +203,7 @@ describe("generateAlgorithmicSheetMusic", () => {
 
   test("should fall back to block chords when independent mode receives NONE", () => {
     const customSettings: GenerationSettings = {
+      maxMeasures: 16,
       maxInterval: 5,
       rhythmComplexity: 3,
       rhythmVariance: 0,
@@ -215,5 +221,27 @@ describe("generateAlgorithmicSheetMusic", () => {
     assert.ok(result.description.includes("Independent Motion"));
     assert.ok(bassVoice.includes("["));
     assert.ok(!bassVoice.includes("z"));
+  });
+
+  test("should honor the configured max measure count", () => {
+    const customSettings: GenerationSettings = {
+      maxMeasures: 12,
+      maxInterval: 4,
+      rhythmComplexity: 3,
+      rhythmVariance: 0,
+      handCoordination: "PARALLEL",
+      accompanimentStyle: ["NONE"],
+      playability: "5-FINGER",
+    };
+
+    const result = withMockedRandom(0, () =>
+      generateAlgorithmicSheetMusic(3, "C Major", customSettings)
+    );
+
+    const trebleVoice = getVoiceBody(result.abcNotation, "treble");
+    const bassVoice = getVoiceBody(result.abcNotation, "bass");
+
+    assert.strictEqual((trebleVoice.match(/\|/g) ?? []).length, 12);
+    assert.strictEqual((bassVoice.match(/\|/g) ?? []).length, 12);
   });
 });

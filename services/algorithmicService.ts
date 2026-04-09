@@ -13,6 +13,7 @@ import {
   getEligibleProgressions,
   INTERNAL_PROFILES,
   getProgressionWeight,
+  getDefaultMaxMeasuresForLevel,
   getSettingsForLevel,
   KEY_MAP,
   NOTES,
@@ -1129,7 +1130,9 @@ export const generateAlgorithmicSheetMusic = (
   const keyName = resolveSelectedKey(difficulty, selectedKey);
   const keyData = KEY_MAP[keyName] || KEY_MAP["C Major"];
   const timeSignature = difficulty >= 3 && Math.random() > 0.6 ? "3/4" : "4/4";
-  const numMeasures = difficulty <= 2 ? 8 : 16;
+  const numMeasures = Number.isFinite(settings.maxMeasures)
+    ? Math.max(4, Math.round(settings.maxMeasures))
+    : getDefaultMaxMeasuresForLevel(difficulty);
   const tempo = difficulty > 5 ? 110 : 80;
 
   // 2. HARMONIC SKELETON
